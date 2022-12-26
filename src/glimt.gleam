@@ -1,16 +1,19 @@
 import gleam/option.{None, Option, Some}
+import gleam/result
 import gleam/dynamic.{Dynamic, from}
 import gleam/erlang/process.{Subject, self}
 import gleam/otp/actor
 import gleam/list.{each}
 import birl/datetime.{now, to_iso}
 import glimt/log_message.{
-  ALL, DEBUG, ERROR, FATAL, INFO, InstanceData, LogLevel, LogMessage, TRACE,
-  WARNING, level_value,
+  ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, LogMessage, TRACE, WARNING,
+  level_value,
 }
 import glimt/serializer/basic.{basic_serializer}
 import glimt/dispatcher/stdout.{dispatcher}
 
+/// Logger that can be use for logging of a `LogMessage` with possible additional `data`
+/// to one or more `LoggerInstance`
 pub opaque type Logger(data) {
   Logger(
     name: Option(String),
@@ -20,9 +23,13 @@ pub opaque type Logger(data) {
   )
 }
 
+/// Generic `Dispatcher` the can dispatch a `LogMessage` with a given `data` type and 
+/// errors of a given type (build in dispatchers use `Dynamic` as error type)
 pub type Dispatcher(data, result_type) =
   fn(LogMessage(data, result_type)) -> Nil
 
+/// A logger instance can be either `Direct` (logging in same process) or `Actor` (logging
+/// in a separate process) 
 pub type LoggerInstance(data) {
   Direct(
     name: Option(String),
@@ -36,41 +43,55 @@ pub type LoggerInstance(data) {
   )
 }
 
-pub fn anonymous() {
+/// Create a new logger with the name "anonymous" that accepts any `LogLevel`
+/// The `Logger` starts without any [LoggerInstance](#LoggerInstance)
+pub fn anonymous() -> Logger(data) {
   Logger(None, level_value(ALL), now_iso, [])
 }
 
-pub fn new(name: String) {
+pub fn new(name: String) -> Logger(data) {
   Logger(Some(name), level_value(ALL), now_iso, [])
 }
 
-pub fn level(logger: Logger(data), level: LogLevel) {
+pub fn level(logger: Logger(data), level: LogLevel) -> Logger(data) {
   Logger(..logger, level_min_value: level_value(level))
 }
 
-pub fn new_direct_stdout(name: String, level: LogLevel) {
-  Direct(Some(name), level_value(level), dispatcher(basic_serializer))
-}
-
-pub fn new_direct_stdout_anonymous(level: LogLevel) {
-  Direct(None, level_value(level), dispatcher(basic_serializer))
-}
-
-pub fn anonymous_direct_logger() {
+pub fn anonymous_stdout() -> Logger(Nil) {
   anonymous()
-  |> append_instance(new_direct_stdout_anonymous(ALL))
+  |> append_instance(stdout_anonymous_instance(ALL))
 }
 
-pub fn named_direct_logger(name: String) {
+pub fn new_stdout(name: String) -> Logger(Nil) {
   new(name)
-  |> append_instance(new_direct_stdout_anonymous(ALL))
+  |> append_instance(stdout_anonymous_instance(ALL))
 }
 
-pub fn append_instance(logger: Logger(data), instance: LoggerInstance(data)) {
+pub fn append_instance(
+  logger: Logger(data),
+  instance: LoggerInstance(data),
+) -> Logger(data) {
   Logger(..logger, instances: [instance, ..logger.instances])
 }
 
-pub fn start_logger(
+pub fn stdout_instance(name: String, level: LogLevel) -> LoggerInstance(Nil) {
+  Direct(Some(name), level_value(level), dispatcher(basic_serializer))
+}
+
+pub fn stdout_anonymous_instance(level: LogLevel) -> LoggerInstance(Nil) {
+  Direct(None, level_value(level), dispatcher(basic_serializer))
+}
+
+pub fn start_instance(
+  name: String,
+  level: LogLevel,
+  dispatch: Dispatcher(data, result_type),
+) -> Result(LoggerInstance(data), actor.StartError) {
+  start_logger_actor(dispatch)
+  |> result.map(fn(subject) { Actor(Some(name), level_value(level), subject) })
+}
+
+pub fn start_logger_actor(
   dispatch,
 ) -> Result(Subject(LogMessage(data, Dynamic)), actor.StartError) {
   actor.start(
@@ -86,39 +107,54 @@ pub fn start_logger(
   )
 }
 
-pub fn debug(logger: Logger(Nil), message) {
+pub fn debug(logger: Logger(Nil), message: String) -> Logger(Nil) {
   let log_message = mk_message(logger, DEBUG, message)
   dispatch_log(logger, log_message)
+  logger
 }
 
-pub fn info(logger: Logger(Nil), message) {
+pub fn info(logger: Logger(Nil), message: String) -> Logger(Nil) {
   let log_message = mk_message(logger, INFO, message)
   dispatch_log(logger, log_message)
+  logger
 }
 
-pub fn warning(logger: Logger(Nil), message) {
+pub fn warning(logger: Logger(Nil), message: String) -> Logger(Nil) {
   let log_message = mk_message(logger, WARNING, message)
   dispatch_log(logger, log_message)
+  logger
 }
 
-pub fn trace(logger: Logger(Nil), message) {
+pub fn trace(logger: Logger(Nil), message: String) -> Logger(Nil) {
   let log_message = mk_message(logger, TRACE, message)
   dispatch_log(logger, log_message)
+  logger
 }
 
-pub fn error(logger: Logger(Nil), message, error: Result(ok, err)) {
+pub fn error(
+  logger: Logger(Nil),
+  message: String,
+  error: Result(ok, err),
+) -> Logger(Nil) {
   let log_message = mk_error_message(logger, ERROR, message, error)
   dispatch_log(logger, log_message)
+  logger
 }
 
-pub fn fatal(logger: Logger(Nil), message, error: Result(ok, err)) {
+pub fn fatal(
+  logger: Logger(Nil),
+  message: String,
+  error: Result(ok, err),
+) -> Logger(Nil) {
   let log_message = mk_error_message(logger, FATAL, message, error)
   dispatch_log(logger, log_message)
+  logger
 }
 
-pub fn log(logger: Logger(Nil), level: LogLevel, message) {
+pub fn log(logger: Logger(Nil), level: LogLevel, message: String) -> Logger(Nil) {
   let log_message = mk_message(logger, level, message)
   dispatch_log(logger, log_message)
+  logger
 }
 
 pub fn log_with_data(
@@ -126,7 +162,7 @@ pub fn log_with_data(
   level: LogLevel,
   message: String,
   data: data,
-) {
+) -> Logger(data) {
   dispatch_log(
     logger,
     LogMessage(
@@ -142,9 +178,10 @@ pub fn log_with_data(
       data: data,
     ),
   )
+  logger
 }
 
-pub fn mk_message(logger: Logger(Nil), level: LogLevel, message: String) {
+fn mk_message(logger: Logger(Nil), level: LogLevel, message: String) {
   LogMessage(
     time: logger.now(),
     name: logger.name,
@@ -159,7 +196,7 @@ pub fn mk_message(logger: Logger(Nil), level: LogLevel, message: String) {
   )
 }
 
-pub fn mk_error_message(
+fn mk_error_message(
   logger: Logger(Nil),
   level: LogLevel,
   message: String,

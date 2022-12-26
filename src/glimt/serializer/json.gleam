@@ -1,11 +1,16 @@
 import gleam/dynamic.{Dynamic}
 import gleam/erlang.{format}
 import gleam/string as str
-import gleam/json.{nullable, object, string}
+import gleam/json.{Json, nullable, object, string}
 import glimt/log_message.{LogMessage, level_string}
 
-pub fn json_serializer(log_message: LogMessage(Nil, Dynamic)) -> String {
-  object([
+pub fn json_serializer(log_message: LogMessage(data, Dynamic)) -> String {
+  object(to_json(log_message))
+  |> json.to_string()
+}
+
+pub fn to_json(log_message: LogMessage(data, Dynamic)) -> List(#(String, Json)) {
+  [
     #("time", string(log_message.time)),
     #("name", nullable(log_message.name, fn(name) { string(name) })),
     #("pid", string(format(log_message.pid))),
@@ -29,6 +34,14 @@ pub fn json_serializer(log_message: LogMessage(Nil, Dynamic)) -> String {
       "error",
       nullable(log_message.error, fn(error) { string(str.inspect(error)) }),
     ),
-  ])
+  ]
+}
+
+pub fn json_serializer_with_data(
+  log_message: LogMessage(data, Dynamic),
+  data_serializer,
+) -> String {
+  let json_spec = to_json(log_message)
+  object([#("data", data_serializer(log_message.data)), ..json_spec])
   |> json.to_string()
 }

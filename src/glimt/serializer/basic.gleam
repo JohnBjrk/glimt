@@ -115,7 +115,7 @@ fn full_name(
       name <> "(" <> format(pid) <> ")/" <> instance_name
     None, Some(instance_pid) ->
       name <> "(" <> format(pid) <> ")/" <> "???" <> "(" <> format(instance_pid) <> ")"
-    None, None -> name <> "(" <> format(pid)
+    None, None -> name <> "(" <> format(pid) <> ")"
   }
 }
 

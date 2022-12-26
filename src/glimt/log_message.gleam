@@ -16,10 +16,6 @@ pub type LogMessage(data, result_type) {
   )
 }
 
-pub type InstanceData {
-  InstanceData(name: String, pid: Pid)
-}
-
 pub type LogLevel {
   ALL
   TRACE
