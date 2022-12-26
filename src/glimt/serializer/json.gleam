@@ -1,4 +1,5 @@
 import gleam/dynamic.{Dynamic}
+import gleam/option.{None, Some}
 import gleam/erlang.{format}
 import gleam/string as str
 import gleam/json.{Json, nullable, object, string}
@@ -42,6 +43,9 @@ pub fn json_serializer_with_data(
   data_serializer,
 ) -> String {
   let json_spec = to_json(log_message)
-  object([#("data", data_serializer(log_message.data)), ..json_spec])
+  case log_message.data {
+    Some(data) -> object([#("data", data_serializer(data)), ..json_spec])
+    None -> object(json_spec)
+  }
   |> json.to_string()
 }

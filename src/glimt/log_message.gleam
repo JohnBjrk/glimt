@@ -12,7 +12,7 @@ pub type LogMessage(data, result_type) {
     level_value: Int,
     message: String,
     error: Option(Result(result_type, result_type)),
-    data: data,
+    data: Option(data),
   )
 }
 

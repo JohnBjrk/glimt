@@ -74,11 +74,11 @@ pub fn append_instance(
   Logger(..logger, instances: [instance, ..logger.instances])
 }
 
-pub fn stdout_instance(name: String, level: LogLevel) -> LoggerInstance(Nil) {
+pub fn stdout_instance(name: String, level: LogLevel) -> LoggerInstance(data) {
   Direct(Some(name), level_value(level), dispatcher(basic_serializer))
 }
 
-pub fn stdout_anonymous_instance(level: LogLevel) -> LoggerInstance(Nil) {
+pub fn stdout_anonymous_instance(level: LogLevel) -> LoggerInstance(data) {
   Direct(None, level_value(level), dispatcher(basic_serializer))
 }
 
@@ -107,51 +107,55 @@ pub fn start_logger_actor(
   )
 }
 
-pub fn debug(logger: Logger(Nil), message: String) -> Logger(Nil) {
+pub fn debug(logger: Logger(data), message: String) -> Logger(data) {
   let log_message = mk_message(logger, DEBUG, message)
   dispatch_log(logger, log_message)
   logger
 }
 
-pub fn info(logger: Logger(Nil), message: String) -> Logger(Nil) {
+pub fn info(logger: Logger(data), message: String) -> Logger(data) {
   let log_message = mk_message(logger, INFO, message)
   dispatch_log(logger, log_message)
   logger
 }
 
-pub fn warning(logger: Logger(Nil), message: String) -> Logger(Nil) {
+pub fn warning(logger: Logger(data), message: String) -> Logger(data) {
   let log_message = mk_message(logger, WARNING, message)
   dispatch_log(logger, log_message)
   logger
 }
 
-pub fn trace(logger: Logger(Nil), message: String) -> Logger(Nil) {
+pub fn trace(logger: Logger(data), message: String) -> Logger(data) {
   let log_message = mk_message(logger, TRACE, message)
   dispatch_log(logger, log_message)
   logger
 }
 
 pub fn error(
-  logger: Logger(Nil),
+  logger: Logger(data),
   message: String,
   error: Result(ok, err),
-) -> Logger(Nil) {
+) -> Logger(data) {
   let log_message = mk_error_message(logger, ERROR, message, error)
   dispatch_log(logger, log_message)
   logger
 }
 
 pub fn fatal(
-  logger: Logger(Nil),
+  logger: Logger(data),
   message: String,
   error: Result(ok, err),
-) -> Logger(Nil) {
+) -> Logger(data) {
   let log_message = mk_error_message(logger, FATAL, message, error)
   dispatch_log(logger, log_message)
   logger
 }
 
-pub fn log(logger: Logger(Nil), level: LogLevel, message: String) -> Logger(Nil) {
+pub fn log(
+  logger: Logger(data),
+  level: LogLevel,
+  message: String,
+) -> Logger(data) {
   let log_message = mk_message(logger, level, message)
   dispatch_log(logger, log_message)
   logger
@@ -175,13 +179,46 @@ pub fn log_with_data(
       level_value: level_value(level),
       message: message,
       error: None,
-      data: data,
+      data: Some(data),
     ),
   )
   logger
 }
 
-fn mk_message(logger: Logger(Nil), level: LogLevel, message: String) {
+pub fn log_error_with_data(
+  logger: Logger(data),
+  level: LogLevel,
+  message: String,
+  error: Result(ok, err),
+  data: data,
+) -> Logger(data) {
+  let dynamic_result = case error {
+    Ok(a) -> Some(Ok(from(a)))
+    Error(a) -> Some(Error(from(a)))
+  }
+  dispatch_log(
+    logger,
+    LogMessage(
+      time: logger.now(),
+      name: logger.name,
+      pid: self(),
+      instance_name: None,
+      instance_pid: None,
+      level: level,
+      level_value: level_value(level),
+      message: message,
+      error: dynamic_result,
+      data: Some(data),
+    ),
+  )
+  logger
+}
+
+fn mk_message(
+  logger: Logger(data),
+  level: LogLevel,
+  message: String,
+) -> LogMessage(data, Dynamic) {
   LogMessage(
     time: logger.now(),
     name: logger.name,
@@ -192,17 +229,20 @@ fn mk_message(logger: Logger(Nil), level: LogLevel, message: String) {
     level_value: level_value(level),
     message: message,
     error: None,
-    data: Nil,
+    data: None,
   )
 }
 
 fn mk_error_message(
-  logger: Logger(Nil),
+  logger: Logger(data),
   level: LogLevel,
   message: String,
   error: Result(ok, err),
-) {
-  assert Error(error_content) = error
+) -> LogMessage(data, Dynamic) {
+  let dynamic_result = case error {
+    Ok(a) -> Some(Ok(from(a)))
+    Error(a) -> Some(Error(from(a)))
+  }
   LogMessage(
     time: logger.now(),
     name: logger.name,
@@ -212,8 +252,8 @@ fn mk_error_message(
     level: level,
     level_value: level_value(level),
     message: message,
-    error: Some(Error(from(error_content))),
-    data: Nil,
+    error: dynamic_result,
+    data: None,
   )
 }
 
