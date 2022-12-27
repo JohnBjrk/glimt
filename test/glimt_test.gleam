@@ -6,9 +6,9 @@ import gleam/json as gjson
 import gleam/http.{method_to_string}
 import gleam/http/request.{Request, set_path}
 import glimt.{
-  Actor, Direct, Logger, append_instance, debug, error, fatal, info, level,
-  log_with_data, new, new_stdout, start_instance, stdout_anonymous_instance,
-  stdout_instance, trace, warning, with_context, with_time_provider,
+  Direct, append_instance, debug, error, fatal, info, level, log_with_data, new,
+  new_stdout, start_instance, stdout_instance, trace, warning, with_context,
+  with_time_provider,
 }
 import glimt/log_message.{ALL, INFO, TRACE, level_value}
 import glimt/serializer/basic.{basic_serializer}
@@ -134,7 +134,7 @@ fn examples() {
     Data("JohnBjrk", "322f38e8-d0a5-43f2-9590-6f435a9b5e41"),
   )
 
-  let request_serializer = fn(request: Request(BitString)) {
+  let request_serializer = fn(request: Request(content_type)) {
     gjson.object([
       #(
         "request",

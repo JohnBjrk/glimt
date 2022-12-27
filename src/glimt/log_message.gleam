@@ -1,6 +1,7 @@
 import gleam/option.{Option}
 import gleam/erlang/process.{Pid}
 
+/// LogMessage contains all the data that can be dispatched/serialized by a logger instance
 pub type LogMessage(data, context, result_type) {
   LogMessage(
     time: String,
@@ -17,6 +18,7 @@ pub type LogMessage(data, context, result_type) {
   )
 }
 
+/// LogLevel used in log messages and as limits for loggers
 pub type LogLevel {
   ALL
   TRACE
@@ -28,6 +30,7 @@ pub type LogLevel {
   NONE
 }
 
+// Convert LogLevel to a string
 pub fn level_string(log_level: LogLevel) {
   case log_level {
     ALL -> "ALL"
@@ -41,6 +44,7 @@ pub fn level_string(log_level: LogLevel) {
   }
 }
 
+// Convert LogLevel to a value. Higher level means more critical log message
 pub fn level_value(log_level: LogLevel) {
   case log_level {
     ALL -> 0
