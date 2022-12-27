@@ -3,17 +3,15 @@
 [![Package Version](https://img.shields.io/hexpm/v/glimt)](https://hex.pm/packages/glimt)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/glimt/)
 
-A Gleam library for logging
+A pure Gleam library for logging
 
 ## Installation
-
-If available on Hex this package can be added to your Gleam project:
 
 ```sh
 gleam add glimt
 ```
 
-and its documentation can be found at <https://hexdocs.pm/glimt>.
+Documentation can be found at <https://hexdocs.pm/glimt>.
 
 ## Quick start
 
@@ -248,6 +246,23 @@ context_logger
 
 logger_with_request
 |> info("User successfully logged in")
+```
+
+## Architecture overview
+
+The following diagram show a schematic overview on how the different part of Glimt are related
+
+```mermaid
+flowchart TB
+    direction RL
+    context[Context]
+    l1[Logger] -.-> context
+    li1["LoggerInstance(direct)"] --> l1
+    li2["LoggerInstance(actor)"] --> l1
+    d1["Dispatcher(stdout)"] --> li1
+    d2["Dispatcher(stdout)"] --> li2
+    s1["Serializer(basic)"] --> d1
+    s2["Serializer(json)"] --> d2
 ```
 
 ## Todo
