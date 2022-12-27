@@ -248,23 +248,6 @@ logger_with_request
 |> info("User successfully logged in")
 ```
 
-## Architecture overview
-
-The following diagram show a schematic overview on how the different part of Glimt are related
-
-```mermaid
-flowchart TB
-    direction RL
-    context[Context]
-    l1[Logger] -.-> context
-    li1["LoggerInstance(direct)"] --> l1
-    li2["LoggerInstance(actor)"] --> l1
-    d1["Dispatcher(stdout)"] --> li1
-    d2["Dispatcher(stdout)"] --> li2
-    s1["Serializer(basic)"] --> d1
-    s2["Serializer(json)"] --> d2
-```
-
 ## Todo
 
 These are some future improvements currently on the road-map for the Glimt library.
@@ -272,8 +255,6 @@ These are some future improvements currently on the road-map for the Glimt libra
 - [ ] File-dispatcher
     - Write log messages to a file. Should probably be implemented as an actor.
     - Support log-rotation?
-- [ ] Add context-data to loggers
-    - Derive a new logger that can be used in for example for the duration of a web request which will automatically add some context specific data to the log-messages.
 - [ ] External log service dispatchers
     - Dispatch logs to an external service (rollbar, loggly ..). This is probably best done in a separate repository which implements a specific external service.
 - [ ] Dispatcher that use stderr
