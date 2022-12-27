@@ -6,9 +6,9 @@ import gleam/json as gjson
 import gleam/http.{method_to_string}
 import gleam/http/request.{Request, set_path}
 import glimt.{
-  Actor, Direct, Logger, anonymous_stdout, append_instance, debug, error, fatal,
-  info, level, log_with_data, new, new_stdout, start_instance,
-  stdout_anonymous_instance, stdout_instance, trace, warning, with_context,
+  Actor, Direct, Logger, append_instance, debug, error, fatal, info, level,
+  log_with_data, new, new_stdout, start_instance, stdout_anonymous_instance,
+  stdout_instance, trace, warning, with_context, with_time_provider,
 }
 import glimt/log_message.{ALL, INFO, TRACE, level_value}
 import glimt/serializer/basic.{basic_serializer}
@@ -30,6 +30,10 @@ type Data {
 }
 
 fn examples() {
+  new_stdout("now_logger")
+  |> with_time_provider(fn() { "NOW" })
+  |> info("No time as the present")
+
   let example_logger = new_stdout("example_logger")
   example_logger
   |> info("Entering hyperspace")
@@ -170,7 +174,7 @@ fn examples() {
 }
 
 pub fn hello_world_test() {
-  let root_logger = anonymous_stdout()
+  let root_logger = new("root_logger")
   root_logger
   |> info("This is a message from root_logger")
   let apa_logger =

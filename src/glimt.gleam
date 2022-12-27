@@ -16,7 +16,7 @@ import glimt/dispatcher/stdout.{dispatcher}
 /// to one or more `LoggerInstance`
 pub opaque type Logger(data, context) {
   Logger(
-    name: Option(String),
+    name: String,
     level_min_value: Int,
     now: fn() -> String,
     context: Option(context),
@@ -46,19 +46,9 @@ pub type LoggerInstance(data, context) {
 
 /// Create a new logger with the name "anonymous" that accepts any `LogLevel`
 /// The `Logger` starts without any [LoggerInstance](#LoggerInstance)
-pub fn anonymous() -> Logger(data, context) {
-  Logger(
-    name: None,
-    level_min_value: level_value(ALL),
-    now: now_iso,
-    context: None,
-    instances: [],
-  )
-}
-
 pub fn new(name: String) -> Logger(data, context) {
   Logger(
-    name: Some(name),
+    name: name,
     level_min_value: level_value(ALL),
     now: now_iso,
     context: None,
@@ -66,6 +56,7 @@ pub fn new(name: String) -> Logger(data, context) {
   )
 }
 
+/// Set a new minimum level for the logger
 pub fn level(
   logger: Logger(data, context),
   level: LogLevel,
@@ -73,24 +64,33 @@ pub fn level(
   Logger(..logger, level_min_value: level_value(level))
 }
 
+/// Add context data to the logger
 pub fn with_context(logger: Logger(data, context), context: context) {
   Logger(..logger, context: Some(context))
 }
 
+/// Get current context data for the logger
 pub fn get_context(logger: Logger(data, context)) -> Option(context) {
   logger.context
 }
 
-pub fn anonymous_stdout() -> Logger(Nil, #(String, String)) {
-  anonymous()
-  |> append_instance(stdout_anonymous_instance(ALL))
+/// Set the function used to get time. The function should return a string representation
+/// of the current time. Can be used to configure the date/time format
+pub fn with_time_provider(
+  logger: Logger(data, context),
+  time_provider: fn() -> String,
+) {
+  Logger(..logger, now: time_provider)
 }
 
+/// Convenience method for getting a direct stdout logger with basic serialization
+/// that accepts all log levels
 pub fn new_stdout(name: String) -> Logger(Nil, #(String, String)) {
   new(name)
   |> append_instance(stdout_anonymous_instance(ALL))
 }
 
+/// Add an instance to the logger
 pub fn append_instance(
   logger: Logger(data, context),
   instance: LoggerInstance(data, context),
@@ -98,6 +98,7 @@ pub fn append_instance(
   Logger(..logger, instances: [instance, ..logger.instances])
 }
 
+/// Creates a direct stdout instance with basic serialization
 pub fn stdout_instance(
   name: String,
   level: LogLevel,
@@ -105,12 +106,15 @@ pub fn stdout_instance(
   Direct(Some(name), level_value(level), dispatcher(basic_serializer))
 }
 
+/// Create an unnamed direct stdout instance with basic serialization
 pub fn stdout_anonymous_instance(
   level: LogLevel,
 ) -> LoggerInstance(data, context) {
   Direct(None, level_value(level), dispatcher(basic_serializer))
 }
 
+/// Starts an actor instance that logs using the provided dispatcher and a
+/// specified level
 pub fn start_instance(
   name: String,
   level: LogLevel,
@@ -120,7 +124,7 @@ pub fn start_instance(
   |> result.map(fn(subject) { Actor(Some(name), level_value(level), subject) })
 }
 
-pub fn start_logger_actor(
+fn start_logger_actor(
   dispatch,
 ) -> Result(Subject(LogMessage(data, context, Dynamic)), actor.StartError) {
   actor.start(
@@ -136,6 +140,7 @@ pub fn start_logger_actor(
   )
 }
 
+/// Log a message at `DEBUG` level
 pub fn debug(
   logger: Logger(data, context),
   message: String,
@@ -145,6 +150,7 @@ pub fn debug(
   logger
 }
 
+/// Log a message at `INFO` level
 pub fn info(
   logger: Logger(data, context),
   message: String,
@@ -154,6 +160,7 @@ pub fn info(
   logger
 }
 
+/// Log a message at `WARNING` level
 pub fn warning(
   logger: Logger(data, context),
   message: String,
@@ -163,6 +170,7 @@ pub fn warning(
   logger
 }
 
+/// Log a message at `TRACE` level
 pub fn trace(
   logger: Logger(data, context),
   message: String,
@@ -172,6 +180,7 @@ pub fn trace(
   logger
 }
 
+/// Log a message at `ERROR` level with the provided `Result`
 pub fn error(
   logger: Logger(data, context),
   message: String,
@@ -182,6 +191,7 @@ pub fn error(
   logger
 }
 
+/// Log a message at `FATAL` level with the provided `Result`
 pub fn fatal(
   logger: Logger(data, context),
   message: String,
@@ -192,6 +202,7 @@ pub fn fatal(
   logger
 }
 
+/// Log a message at the provided level
 pub fn log(
   logger: Logger(data, context),
   level: LogLevel,
@@ -202,6 +213,7 @@ pub fn log(
   logger
 }
 
+/// Log a message at the provided level with some additional data
 pub fn log_with_data(
   logger: Logger(data, context),
   level: LogLevel,
@@ -227,6 +239,7 @@ pub fn log_with_data(
   logger
 }
 
+/// Log a message at the provided level together with the provided `Result` and data
 pub fn log_error_with_data(
   logger: Logger(data, context),
   level: LogLevel,

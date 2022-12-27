@@ -4,7 +4,7 @@ import gleam/erlang/process.{Pid}
 pub type LogMessage(data, context, result_type) {
   LogMessage(
     time: String,
-    name: Option(String),
+    name: String,
     pid: Pid,
     instance_name: Option(String),
     instance_pid: Option(Pid),

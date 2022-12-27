@@ -22,7 +22,7 @@ pub fn add_standard_log_message(builder) {
   fn(log_message: LogMessage(data, context, Dynamic)) -> List(#(String, Json)) {
     let standard_spec = [
       #("time", string(log_message.time)),
-      #("name", nullable(log_message.name, fn(name) { string(name) })),
+      #("name", string(log_message.name)),
       #("pid", string(format(log_message.pid))),
       #(
         "instance_name",
@@ -45,6 +45,7 @@ pub fn add_standard_log_message(builder) {
         nullable(log_message.error, fn(error) { string(str.inspect(error)) }),
       ),
     ]
+
     let previous_spec = builder(log_message)
     list.append(previous_spec, standard_spec)
   }

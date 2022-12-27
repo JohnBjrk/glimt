@@ -140,20 +140,9 @@ pub fn basic_serializer(log_message: LogMessage(data, context, Dynamic)) {
     Some(err) -> " | " <> inspect(err)
     None -> ""
   }
-  case name {
-    Some(name) -> {
-      let styled_name =
-        name
-        |> full_name(pid, instance_name, instance_pid)
-        |> style_name()
-      styled_time <> " | " <> styled_level <> " | " <> styled_name <> " | " <> styled_message <> error_string
-    }
-    None -> {
-      let styled_name =
-        "anonymous"
-        |> full_name(pid, instance_name, instance_pid)
-        |> style_name()
-      styled_time <> " | " <> styled_level <> " | " <> styled_name <> " | " <> styled_message <> error_string
-    }
-  }
+  let styled_name =
+    name
+    |> full_name(pid, instance_name, instance_pid)
+    |> style_name()
+  styled_time <> " | " <> styled_level <> " | " <> styled_name <> " | " <> styled_message <> error_string
 }
