@@ -252,6 +252,8 @@ logger_with_request
 
 These are some future improvements currently on the road-map for the Glimt library.
 
+- [ ] File-based config for setting log-levels of loggers based on name
+    - Make it possible to override log-levels in libs by setting them in config file
 - [ ] File-dispatcher
     - Write log messages to a file. Should probably be implemented as an actor.
     - Support log-rotation?
