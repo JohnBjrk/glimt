@@ -73,7 +73,7 @@ pub fn level(
   Logger(..logger, level_min_value: level_value(level))
 }
 
-pub fn add_context(logger: Logger(data, context), context: context) {
+pub fn with_context(logger: Logger(data, context), context: context) {
   Logger(..logger, context: Some(context))
 }
 

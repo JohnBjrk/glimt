@@ -65,7 +65,7 @@ pub fn add_context(builder, context_serializer) {
   fn(log_message: LogMessage(data, context, Dynamic)) -> List(#(String, Json)) {
     let previous_spec = builder(log_message)
     let context_spec = case log_message.context {
-      Some(data) -> [#("context", context_serializer(data))]
+      Some(context) -> [#("context", context_serializer(context))]
       None -> []
     }
     list.append(previous_spec, context_spec)

@@ -3,17 +3,21 @@ import gleeunit/should
 import gleam/option.{None, Some}
 import gleam/erlang/process
 import gleam/json as gjson
+import gleam/http.{method_to_string}
+import gleam/http/request.{Request, set_path}
 import glimt.{
   Actor, Direct, Logger, anonymous_stdout, append_instance, debug, error, fatal,
   info, level, log_with_data, new, new_stdout, start_instance,
-  stdout_anonymous_instance, stdout_instance, trace, warning,
+  stdout_anonymous_instance, stdout_instance, trace, warning, with_context,
 }
 import glimt/log_message.{ALL, INFO, TRACE, level_value}
 import glimt/serializer/basic.{basic_serializer}
 import glimt/serializer/json.{
-  add_data, add_standard_log_message, build, builder, new_json_serializer,
+  add_context, add_data, add_standard_log_message, build, builder,
+  new_json_serializer,
 }
 import glimt/dispatcher/stdout.{dispatcher}
+import gleam/io
 
 pub fn main() {
   // gleeunit.main()
@@ -119,13 +123,48 @@ fn examples() {
         |> build(),
       ),
     ))
-  // dispatcher(json_serializer_with_data(_, data_serializer)),
   data_logger
   |> log_with_data(
     TRACE,
     "Fetching user achievements",
     Data("JohnBjrk", "322f38e8-d0a5-43f2-9590-6f435a9b5e41"),
   )
+
+  let request_serializer = fn(request: Request(BitString)) {
+    gjson.object([
+      #(
+        "request",
+        gjson.object([
+          #("method", gjson.string(method_to_string(request.method))),
+          #("path", gjson.string(request.path)),
+        ]),
+      ),
+    ])
+  }
+
+  let context_logger =
+    new("context_logger")
+    |> level(TRACE)
+    |> append_instance(Direct(
+      None,
+      level_value(TRACE),
+      dispatcher(
+        builder()
+        |> add_standard_log_message()
+        |> add_context(request_serializer)
+        |> build(),
+      ),
+    ))
+
+  let logger_with_request =
+    context_logger
+    |> with_context(
+      request.new()
+      |> set_path("api/login"),
+    )
+
+  logger_with_request
+  |> info("User successfully logged in")
 
   process.sleep(200)
 }

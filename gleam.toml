@@ -19,3 +19,4 @@ gleam_json = "~> 0.5"
 
 [dev-dependencies]
 gleeunit = "~> 0.7"
+gleam_http = "~> 3.1"

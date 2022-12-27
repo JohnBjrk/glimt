@@ -149,7 +149,7 @@ new("json_logger")
 |> append_instance(Direct(
     None,
     level_value(TRACE),
-    dispatcher(json_serializer),
+    dispatcher(new_json_serializer()),
 ))
 json_logger
 |> info("Hi Hypsipyle, it's me Jason")
@@ -171,16 +171,28 @@ type Data {
 }
 ```
 
-Then it can be serialized to JSON and dispatched to stdout using the following:
+In order to serialize the additional data we can use the builder in the `json` module to attach a serializer for the custom data-type. To log the data the `log_with_data` should be used.
 
 ```gleam
+let data_serializer = fn(data: Data) {
+gjson.object([
+    #("user_id", gjson.string(data.user_id)),
+    #("trace_id", gjson.string(data.trace_id)),
+])
+}
+
 let data_logger =
 new("data_logger")
 |> level(TRACE)
 |> append_instance(Direct(
     None,
     level_value(TRACE),
-    dispatcher(json_serializer_with_data(_, data_serializer)),
+    dispatcher(
+    builder()
+    |> add_standard_log_message()
+    |> add_data(data_serializer)
+    |> build(),
+    ),
 ))
 data_logger
 |> log_with_data(
@@ -190,12 +202,53 @@ Data("JohnBjrk", "322f38e8-d0a5-43f2-9590-6f435a9b5e41"),
 )
 ```
 
+> NOTE: `gleam_json` was imported as `import gleam/json as gjson` to avoid naming conflict with Glimts `json`module
+
 Of course if there is need for a more specific JSON serialization of the whole log-message a custom-written serializer can be supplied to the dispatcher.
 
-## TODO Docs
-- [x] JSON serializer
-- [x] log_with_data
-- [ ] Check return types of logger create methods
+## Logger context
+
+Sometimes it is useful for always log some data from the context. In order to do this we can use the `with_context` method which accepts a custom context and returns a logger which will include this context in all dispatched log-messages. The context can be serialized using the same strategy as for additional data using the `add_context` in the json serializer builder.
+
+The following example adds some information from a `gleam_http` request to the log-message.
+
+```gleam
+let request_serializer = fn(request: Request(BitString)) {
+gjson.object([
+    #(
+    "request",
+    gjson.object([
+        #("method", gjson.string(method_to_string(request.method))),
+        #("path", gjson.string(request.path)),
+    ]),
+    ),
+])
+}
+
+let context_logger =
+new("context_logger")
+|> level(TRACE)
+|> append_instance(Direct(
+    None,
+    level_value(TRACE),
+    dispatcher(
+    builder()
+    |> add_standard_log_message()
+    |> add_context(request_serializer)
+    |> build(),
+    ),
+))
+
+let logger_with_request =
+context_logger
+|> with_context(
+    request.new()
+    |> set_path("api/login"),
+)
+
+logger_with_request
+|> info("User successfully logged in")
+```
 
 ## Todo
 
