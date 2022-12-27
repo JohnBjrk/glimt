@@ -119,7 +119,7 @@ fn full_name(
   }
 }
 
-pub fn basic_serializer(log_message: LogMessage(data, Dynamic)) {
+pub fn basic_serializer(log_message: LogMessage(data, context, Dynamic)) {
   assert LogMessage(
     time: time,
     name: name,

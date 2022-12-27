@@ -13,11 +13,13 @@ pub fn new_json_serializer() {
 }
 
 pub fn builder() {
-  fn(_log_message: LogMessage(data, Dynamic)) -> List(#(String, Json)) { [] }
+  fn(_log_message: LogMessage(data, context, Dynamic)) -> List(#(String, Json)) {
+    []
+  }
 }
 
 pub fn add_standard_log_message(builder) {
-  fn(log_message: LogMessage(data, Dynamic)) -> List(#(String, Json)) {
+  fn(log_message: LogMessage(data, context, Dynamic)) -> List(#(String, Json)) {
     let standard_spec = [
       #("time", string(log_message.time)),
       #("name", nullable(log_message.name, fn(name) { string(name) })),
@@ -49,7 +51,7 @@ pub fn add_standard_log_message(builder) {
 }
 
 pub fn add_data(builder, data_serializer) {
-  fn(log_message: LogMessage(data, Dynamic)) -> List(#(String, Json)) {
+  fn(log_message: LogMessage(data, context, Dynamic)) -> List(#(String, Json)) {
     let previous_spec = builder(log_message)
     let data_spec = case log_message.data {
       Some(data) -> [#("data", data_serializer(data))]
@@ -59,8 +61,19 @@ pub fn add_data(builder, data_serializer) {
   }
 }
 
+pub fn add_context(builder, context_serializer) {
+  fn(log_message: LogMessage(data, context, Dynamic)) -> List(#(String, Json)) {
+    let previous_spec = builder(log_message)
+    let context_spec = case log_message.context {
+      Some(data) -> [#("context", context_serializer(data))]
+      None -> []
+    }
+    list.append(previous_spec, context_spec)
+  }
+}
+
 pub fn build(builder) {
-  fn(log_message: LogMessage(data, Dynamic)) -> String {
+  fn(log_message: LogMessage(data, context, Dynamic)) -> String {
     object(builder(log_message))
     |> json.to_string()
   }

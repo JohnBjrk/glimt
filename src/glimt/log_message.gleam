@@ -1,7 +1,7 @@
 import gleam/option.{Option}
 import gleam/erlang/process.{Pid}
 
-pub type LogMessage(data, result_type) {
+pub type LogMessage(data, context, result_type) {
   LogMessage(
     time: String,
     name: Option(String),
@@ -13,6 +13,7 @@ pub type LogMessage(data, result_type) {
     message: String,
     error: Option(Result(result_type, result_type)),
     data: Option(data),
+    context: Option(context),
   )
 }
 
