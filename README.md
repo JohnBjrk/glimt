@@ -153,7 +153,7 @@ new("json_logger")
     dispatcher(new_json_serializer()),
 ))
 json_logger
-|> info("Hi Hypsipyle, it's me Jason")
+|> info("Hi Hypsipyle, it's me Thoas")
 ```
 
 ```json
