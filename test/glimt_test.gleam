@@ -1,14 +1,13 @@
 import gleeunit
-import gleeunit/should
-import gleam/option.{None, Some}
+import gleam/option.{None}
 import gleam/erlang/process
+import gleam/erlang.{start_arguments}
 import gleam/json as gjson
 import gleam/http.{method_to_string}
 import gleam/http/request.{Request, set_path}
 import glimt.{
   Direct, append_instance, debug, error, fatal, info, level, log_with_data, new,
-  new_stdout, start_instance, stdout_instance, trace, warning, with_context,
-  with_time_provider,
+  new_stdout, start_instance, trace, warning, with_context, with_time_provider,
 }
 import glimt/log_message.{ALL, INFO, TRACE, level_value}
 import glimt/serializer/basic.{basic_serializer}
@@ -20,8 +19,19 @@ import glimt/dispatcher/stdout.{dispatcher}
 import gleam/io
 
 pub fn main() {
-  // gleeunit.main()
-  // hello_world_test()
+  case start_arguments() {
+    [] -> gleeunit.main()
+    ["demo"] -> examples()
+    _ -> {
+      io.println("Unexpected argument(s)!")
+      io.println("Usage:")
+      io.println("gleam run test (to run normal tests")
+      io.println("gleam run test demo (to run demo)")
+    }
+  }
+}
+
+pub fn examples_test() {
   examples()
 }
 
@@ -169,57 +179,6 @@ fn examples() {
 
   logger_with_request
   |> info("User successfully logged in")
-
-  process.sleep(200)
-}
-
-pub fn hello_world_test() {
-  let root_logger = new("root_logger")
-  root_logger
-  |> info("This is a message from root_logger")
-  let apa_logger =
-    new_stdout("apa")
-    |> level(TRACE)
-    |> append_instance(Direct(
-      None,
-      level_value(TRACE),
-      dispatcher(new_json_serializer()),
-    ))
-  apa_logger
-  |> trace("Trace message")
-  apa_logger
-  |> debug("Debug message")
-  apa_logger
-  |> info("Info message")
-  apa_logger
-  |> warning("Warning message")
-  apa_logger
-  |> error("Error message", Error(apa_logger))
-  apa_logger
-  |> fatal("Fatal message", Error(["Some", "Custom", "Error"]))
-
-  assert Ok(actor_instance) =
-    start_instance("actor", TRACE, dispatcher(basic_serializer))
-
-  let actor_logger =
-    new("multi")
-    |> level(TRACE)
-    |> append_instance(stdout_instance("direct", TRACE))
-    |> append_instance(actor_instance)
-
-  actor_logger
-  |> info("Message from actor logger")
-
-  let json_logger =
-    new("json_logger")
-    |> level(TRACE)
-    |> append_instance(Direct(
-      None,
-      level_value(TRACE),
-      dispatcher(new_json_serializer()),
-    ))
-  json_logger
-  |> info("Message from json logger")
 
   process.sleep(200)
 }

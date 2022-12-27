@@ -1,4 +1,3 @@
-import gleam/dynamic.{Dynamic}
 import gleam/option.{None, Some}
 import gleam/erlang.{format}
 import gleam/list
