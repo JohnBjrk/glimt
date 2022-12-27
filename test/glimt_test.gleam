@@ -10,7 +10,9 @@ import glimt.{
 }
 import glimt/log_message.{ALL, INFO, TRACE, level_value}
 import glimt/serializer/basic.{basic_serializer}
-import glimt/serializer/json.{json_serializer, json_serializer_with_data}
+import glimt/serializer/json.{
+  add_data, add_standard_log_message, build, builder, new_json_serializer,
+}
 import glimt/dispatcher/stdout.{dispatcher}
 
 pub fn main() {
@@ -92,7 +94,7 @@ fn examples() {
     |> append_instance(Direct(
       None,
       level_value(TRACE),
-      dispatcher(json_serializer),
+      dispatcher(new_json_serializer()),
     ))
   json_logger
   |> info("Hi Hypsipyle, it's me Jason")
@@ -110,8 +112,14 @@ fn examples() {
     |> append_instance(Direct(
       None,
       level_value(TRACE),
-      dispatcher(json_serializer_with_data(_, data_serializer)),
+      dispatcher(
+        builder()
+        |> add_standard_log_message()
+        |> add_data(data_serializer)
+        |> build(),
+      ),
     ))
+  // dispatcher(json_serializer_with_data(_, data_serializer)),
   data_logger
   |> log_with_data(
     TRACE,
@@ -132,7 +140,7 @@ pub fn hello_world_test() {
     |> append_instance(Direct(
       None,
       level_value(TRACE),
-      dispatcher(json_serializer),
+      dispatcher(new_json_serializer()),
     ))
   apa_logger
   |> trace("Trace message")
@@ -165,7 +173,7 @@ pub fn hello_world_test() {
     |> append_instance(Direct(
       None,
       level_value(TRACE),
-      dispatcher(json_serializer),
+      dispatcher(new_json_serializer()),
     ))
   json_logger
   |> info("Message from json logger")
