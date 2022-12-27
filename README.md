@@ -157,7 +157,7 @@ json_logger
 ```
 
 ```json
-{"time":"2022-12-25T20:11:20.350Z","name":"json_logger","pid":"<0.9.0>","instance_name":null,"instance_pid":null,"level":"INFO","message":"Hi Hypsipyle, it's me Jason","error":null}
+{"time":"2022-12-25T20:11:20.350Z","name":"json_logger","pid":"<0.9.0>","instance_name":null,"instance_pid":null,"level":"INFO","message":"Hi Hypsipyle, it's me Thoas","error":null}
 ```
 
 ## Additional data

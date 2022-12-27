@@ -115,7 +115,7 @@ fn examples() {
       dispatcher(new_json_serializer()),
     ))
   json_logger
-  |> info("Hi Hypsipyle, it's me Jason")
+  |> info("Hi Hypsipyle, it's me Thoas")
 
   let data_serializer = fn(data: Data) {
     gjson.object([
