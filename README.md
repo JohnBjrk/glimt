@@ -3,7 +3,10 @@
 [![Package Version](https://img.shields.io/hexpm/v/glimt)](https://hex.pm/packages/glimt)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/glimt/)
 
-A pure Gleam library for logging
+A Gleam library for logging
+
+
+*Get a glimpse (glimt in Swedish) of what is going on inside your software*
 
 ## Installation
 
