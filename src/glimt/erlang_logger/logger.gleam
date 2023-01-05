@@ -70,7 +70,7 @@ fn map_level(log_level: LogLevel) -> Level {
   }
 }
 
-pub external fn logger_log_report(
+external fn logger_log_report(
   Level,
   Map(Atom, Dynamic),
   Map(Atom, Dynamic),

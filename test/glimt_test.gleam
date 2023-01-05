@@ -190,37 +190,59 @@ fn examples() {
   let logger_logger =
     new("logger_logger")
     |> level(TRACE)
-    |> append_instance(Direct(
-      Some("logger_dispatch"),
-      level_value(TRACE),
-      logger_dispatch,
-    ))
+    |> append_instance(Direct(None, level_value(TRACE), logger_dispatch))
 
-  json_formatter.use_with_handler("default")
+  basic_formatter.use_with_handler("default")
   logger_logger
-  |> fatal("Dispatching to erlang logger", Error("Something went wrong"))
+  |> error(
+    "Could not connect to database",
+    Error("Connection timeout: 127:0.0.1:5432"),
+  )
 
   let report_logger =
     new("report_logger")
     |> level(TRACE)
-    |> append_instance(Direct(
-      Some("logger_dispatch"),
-      level_value(TRACE),
-      logger_report_dispatch,
-    ))
+    |> append_instance(Direct(None, level_value(TRACE), logger_report_dispatch))
 
   report_logger
-  |> with_context([#("test", "report"), #("other", "field")])
-  |> log_with_data(INFO, "Dispatching with report logger", [#("data", "field")])
-
-  logger.logger_log_report(
-    Notice,
-    map.from_list([
-      #(atom.create_from_string("apa"), dynamic.from("bepa")),
-      #(atom.create_from_string("cepa"), dynamic.from("depa")),
-    ]),
-    map.new(),
+  |> with_context([
+    #("host", "blue-panda.fly.dev"),
+    #("url", "users"),
+    #("params", "token=48dhf8h826ad876f78&"),
+  ])
+  |> log_with_data(
+    INFO,
+    "Successfully fetched user data",
+    [#("username", "JohnBjrk"), #("github_url", "https://github.com/JohnBjrk")],
   )
 
+  let logger_logger =
+    new("logger_logger")
+    |> level(TRACE)
+    |> append_instance(Direct(None, level_value(TRACE), logger_dispatch))
+
+  json_formatter.use_with_handler("default")
+  logger_logger
+  |> error(
+    "Could not connect to database",
+    Error("Connection timeout: 127:0.0.1:5432"),
+  )
+
+  let report_logger =
+    new("report_logger")
+    |> level(TRACE)
+    |> append_instance(Direct(None, level_value(TRACE), logger_report_dispatch))
+
+  report_logger
+  |> with_context([
+    #("host", "blue-panda.fly.dev"),
+    #("url", "users"),
+    #("params", "token=48dhf8h826ad876f78&"),
+  ])
+  |> log_with_data(
+    INFO,
+    "Successfully fetched user data",
+    [#("username", "JohnBjrk"), #("github_url", "https://github.com/JohnBjrk")],
+  )
   process.sleep(200)
 }

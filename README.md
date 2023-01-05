@@ -251,6 +251,68 @@ logger_with_request
 |> info("User successfully logged in")
 ```
 
+## Erlang logger integration
+
+It is possible to use the erlang built in [logger](https://www.erlang.org/doc/apps/kernel/logger_chapter.html) as a dispatcher in Glimt. There are two slightly different dispatchers that can be added to a logger to accomplish this: `logger_dispatch` and `logger_report_dispatch`. It is also possible to configure the erlang logger to use Glimt formatting. The following example uses the `basic_formatter` together with `logger_dispatch` to log an error. The `logger_dispatch` will add the message as a string.
+
+```gleam
+let logger_logger =
+new("logger_logger")
+|> level(TRACE)
+|> append_instance(Direct(None, level_value(TRACE), logger_dispatch))
+
+basic_formatter.use_with_handler("default")
+logger_logger
+|> error(
+"Could not connect to database",
+Error("Connection timeout: 127:0.0.1:5432"),
+)
+```
+
+This will produce the following output:
+
+> <span style="color:gray">2023-01-05T23:07:13.081161+01:00</span> | <span style="color:red">error</span> | <span style="color:magenta">logger_logger(<0.9.0>)</span> | Could not connect to database | Error("Connection timeout: 127:0.0.1:5432")
+
+Note that we are setting the formatter for the `default` logger handler. This means that any log-message sent to the erlang logger will use this format.
+
+The `logger_report_dispatch` will log a report instead of a plain string (which will include the message and other data). This is useful in combination with a logger with `context` and/or `data` since these two will be merged into the report. The following example combines the two:
+
+```gleam
+let report_logger =
+new("report_logger")
+|> level(TRACE)
+|> append_instance(Direct(None, level_value(TRACE), logger_report_dispatch))
+
+report_logger
+|> with_context([
+#("host", "blue-panda.fly.dev"),
+#("url", "users"),
+#("params", "token=48dhf8h826ad876f78&"),
+])
+|> log_with_data(
+INFO,
+"Successfully fetched user data",
+[#("username", "JohnBjrk"), #("github_url", "https://github.com/JohnBjrk")],
+)
+```
+
+It gives the following output:
+
+> <span style="color:gray">2023-01-05T23:07:13.084284+01:00</span> | <span style="color:green">notice</span> | <span style="color:magenta">report_logger(<0.9.0>)</span> | (github_url => https://github.com/JohnBjrk, host => blue-panda.fly.dev, msg => Successfully fetched user data, params => token=48dhf8h826ad876f78&, url => users, username => JohnBjrk)
+
+It is also possible to make the output json from the erlang logger. The following line changes the `default` handler to output json:.
+
+```gleam
+json_formatter.use_with_handler("default")
+```
+
+With this the two examples above will output the following:
+
+```json
+{"error":"Error(\"Connection timeout: 127:0.0.1:5432\")","time":1672958146686409,"time_string":"2023-01-05T23:35:46.686409+01:00","message":"Could not connect to database"}
+{"time":1672958146686453,"time_string":"2023-01-05T23:35:46.686453+01:00","github_url":"https://github.com/JohnBjrk","host":"blue-panda.fly.dev","msg":"Successfully fetched user data","params":"token=48dhf8h826ad876f78&","url":"users","username":"JohnBjrk"}
+```
+
 ## Todo
 
 These are some future improvements currently on the road-map for the Glimt library.
