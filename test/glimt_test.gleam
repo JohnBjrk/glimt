@@ -196,9 +196,9 @@ fn examples() {
       logger_dispatch,
     ))
 
-  basic_formatter.use_with_handler("default")
+  json_formatter.use_with_handler("default")
   logger_logger
-  |> fatal("Disptaching to erlang logger", Error("Someting went wrong"))
+  |> fatal("Dispatching to erlang logger", Error("Something went wrong"))
 
   let report_logger =
     new("report_logger")

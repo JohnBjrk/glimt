@@ -1,6 +1,7 @@
 import gleam/dynamic.{Dynamic, from}
 import gleam/list.{append, map}
 import gleam/map.{Map}
+import gleam/string.{inspect}
 import gleam/option.{Option, Some}
 import glimt/log_message.{
   ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, LogMessage, NONE, TRACE, WARNING,
@@ -9,11 +10,11 @@ import glimt/erlang_logger/level.{Critical, Debug, Info, Level, Notice, Warning}
 import glimt/erlang_logger/common.{a}
 import gleam/erlang/atom.{Atom}
 
-pub fn logger_dispatch(log_message: LogMessage(data, context, result_type)) {
+pub fn logger_dispatch(log_message: LogMessage(data, context, Dynamic)) {
   logger_log_message(
     map_level(log_message.level),
     log_message.message,
-    map.from_list([#(a("loggername"), log_message.name)]),
+    create_meta(log_message),
   )
 }
 
@@ -21,7 +22,7 @@ pub fn logger_report_dispatch(
   log_message: LogMessage(
     List(#(String, String)),
     List(#(String, String)),
-    result_type,
+    Dynamic,
   ),
 ) {
   let data_report = as_report_list(log_message.data)
@@ -31,8 +32,17 @@ pub fn logger_report_dispatch(
   logger_log_report(
     map_level(log_message.level),
     map.from_list(report),
-    map.from_list([#(a("loggername"), from(log_message.name))]),
+    create_meta(log_message),
   )
+}
+
+fn create_meta(log_message: LogMessage(data, context, Dynamic)) {
+  let meta_with_name = [#(a("loggername"), from(log_message.name))]
+  let meta = case log_message.error {
+    Some(error) -> [#(a("error"), from(inspect(error))), ..meta_with_name]
+    _ -> meta_with_name
+  }
+  map.from_list(meta)
 }
 
 fn as_report_list(data: Option(List(#(String, String)))) {
@@ -67,5 +77,5 @@ pub external fn logger_log_report(
 ) -> Nil =
   "logger" "log"
 
-external fn logger_log_message(Level, String, Map(Atom, String)) -> Nil =
+external fn logger_log_message(Level, String, Map(Atom, Dynamic)) -> Nil =
   "logger" "log"

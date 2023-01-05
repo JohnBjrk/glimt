@@ -15,6 +15,7 @@ pub type LogEvent {
     message: String,
     pid: Pid,
     logger_name: Option(String),
+    error: Option(String),
   )
   Report(
     time_us: Int,
@@ -22,6 +23,7 @@ pub type LogEvent {
     report: List(#(Dynamic, Dynamic)),
     pid: Pid,
     logger_name: Option(String),
+    error: Option(String),
   )
 }
 
@@ -33,6 +35,10 @@ pub fn decode_log_event(
   try pid = field(a("pid"), dynamic)(meta)
   let logger_name = case field(a("loggername"), string)(meta) {
     Ok(name) -> Some(name)
+    _ -> None
+  }
+  let error = case field(a("error"), string)(meta) {
+    Ok(error) -> Some(error)
     _ -> None
   }
   try level = field(a("level"), dynamic)(log_event)
@@ -48,6 +54,7 @@ pub fn decode_log_event(
         message,
         unsafe_coerce(pid),
         logger_name,
+        error,
       ))
     }
 
@@ -59,6 +66,7 @@ pub fn decode_log_event(
         report_as_list(report),
         unsafe_coerce(pid),
         logger_name,
+        error,
       ))
     }
   }
