@@ -18,6 +18,7 @@ import glimt/serializer/json.{
 import glimt/dispatcher/stdout.{dispatcher}
 import glimt/erlang_logger/logger.{logger_dispatch}
 import glimt/erlang_logger/basic_formatter
+import glimt/erlang_logger/json_formatter
 import gleam/io
 import glimt/erlang_logger/level.{Notice}
 import gleam/map
@@ -195,7 +196,7 @@ fn examples() {
       logger_dispatch,
     ))
 
-  basic_formatter.use_with_handler("default")
+  json_formatter.use_with_handler("default")
   logger_logger
   |> fatal("Disptaching to erlang logger", Error("Someting went wrong"))
 

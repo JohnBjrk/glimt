@@ -1,11 +1,13 @@
 import gleam/io
 import gleam/list
 import gleam/string.{join} as gleam_string
-import gleam/dynamic.{Dynamic, from, string}
+import gleam/dynamic.{Dynamic, from}
 import gleam/option.{None, Option, Some}
 import gleam/erlang
 import gleam/erlang/process.{Pid}
-import glimt/erlang_logger/common.{a, set_handler_config}
+import glimt/erlang_logger/common.{
+  a, built_in_format, format_dynamic, set_handler_config,
+}
 import glimt/erlang_logger/level.{
   Alert, Critical, Debug, Emergency, Error, Info, Level, Notice, Warning,
 }
@@ -60,13 +62,6 @@ fn format_report(report: List(#(Dynamic, Dynamic))) {
   "(" <> report_content <> ")"
 }
 
-fn format_dynamic(dynamic_value: Dynamic) {
-  case string(dynamic_value) {
-    Ok(string_value) -> string_value
-    _ -> erlang.format(dynamic_value)
-  }
-}
-
 fn format_name_and_pid(logger_name: Option(String), pid: Pid) {
   case logger_name {
     Some(name) -> name <> "(" <> erlang.format(pid) <> ")"
@@ -93,6 +88,3 @@ fn time_to_string(time: Int) -> String {
 
 external fn system_time_to_rfc3339(time: Int, options: Dynamic) -> String =
   "calendar" "system_time_to_rfc3339"
-
-external fn built_in_format(log_event: Dynamic, config: Dynamic) -> String =
-  "logger_formatter" "format"
