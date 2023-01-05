@@ -1,5 +1,5 @@
 import gleeunit
-import gleam/option.{None}
+import gleam/option.{None, Some}
 import gleam/erlang/process
 import gleam/erlang.{start_arguments}
 import gleam/json as gjson
@@ -16,7 +16,13 @@ import glimt/serializer/json.{
   new_json_serializer,
 }
 import glimt/dispatcher/stdout.{dispatcher}
+import glimt/erlang_logger/logger.{logger_dispatch}
+import glimt/erlang_logger/basic_formatter
 import gleam/io
+import glimt/erlang_logger/level.{Notice}
+import gleam/map
+import gleam/dynamic
+import gleam/erlang/atom
 
 pub fn main() {
   case start_arguments() {
@@ -179,6 +185,27 @@ fn examples() {
 
   logger_with_request
   |> info("User successfully logged in")
+
+  let logger_logger =
+    new("logger_logger")
+    |> level(TRACE)
+    |> append_instance(Direct(
+      Some("logger_dispatch"),
+      level_value(TRACE),
+      logger_dispatch,
+    ))
+
+  basic_formatter.use_with_handler("default")
+  logger_logger
+  |> fatal("Disptaching to erlang logger", Error("Someting went wrong"))
+
+  logger.logger_log_report(
+    Notice,
+    map.from_list([
+      #(atom.create_from_string("apa"), dynamic.from("bepa")),
+      #(atom.create_from_string("cepa"), dynamic.from("depa")),
+    ]),
+  )
 
   process.sleep(200)
 }
