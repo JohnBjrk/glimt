@@ -7,9 +7,9 @@ import glimt/log_message.{
   ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, LogMessage, NONE, TRACE, WARNING,
   level_string,
 }
-import galant.{
-  dim, magenta, open, placeholder, start_bold, start_cyan, start_dim,
-  start_green, start_red, start_yellow, to_string_styler,
+import glimt/style.{
+  style_debug, style_error, style_fatal, style_info, style_name, style_plain,
+  style_time, style_trace, style_warning,
 }
 
 pub fn level_symbol(log_level: LogLevel) {
@@ -25,56 +25,6 @@ pub fn level_symbol(log_level: LogLevel) {
   }
 }
 
-fn style_trace() {
-  open()
-  |> start_dim()
-  |> start_cyan()
-  |> placeholder()
-  |> to_string_styler()
-}
-
-fn style_debug() {
-  open()
-  |> start_cyan()
-  |> placeholder()
-  |> to_string_styler()
-}
-
-fn style_info() {
-  open()
-  |> start_green()
-  |> placeholder()
-  |> to_string_styler()
-}
-
-fn style_error() {
-  open()
-  |> start_red()
-  |> placeholder()
-  |> to_string_styler()
-}
-
-fn style_fatal() {
-  open()
-  |> start_bold()
-  |> start_red()
-  |> placeholder()
-  |> to_string_styler()
-}
-
-fn style_warning() {
-  open()
-  |> start_yellow()
-  |> placeholder()
-  |> to_string_styler()
-}
-
-fn style_plain() {
-  open()
-  |> placeholder()
-  |> to_string_styler()
-}
-
 fn style_level(log_level: LogLevel) {
   case log_level {
     ALL -> style_plain()
@@ -86,18 +36,6 @@ fn style_level(log_level: LogLevel) {
     FATAL -> style_fatal()
     NONE -> style_plain()
   }
-}
-
-fn style_name(name: String) {
-  open()
-  |> magenta(name)
-  |> galant.to_string()
-}
-
-fn style_time(time: String) {
-  open()
-  |> dim(time)
-  |> galant.to_string()
 }
 
 fn full_name(
