@@ -16,7 +16,7 @@ import glimt/serializer/json.{
   new_json_serializer,
 }
 import glimt/dispatcher/stdout.{dispatcher}
-import glimt/erlang_logger/logger.{logger_dispatch}
+import glimt/erlang_logger/logger.{logger_dispatch, logger_report_dispatch}
 import glimt/erlang_logger/basic_formatter
 import glimt/erlang_logger/json_formatter
 import gleam/io
@@ -196,9 +196,22 @@ fn examples() {
       logger_dispatch,
     ))
 
-  json_formatter.use_with_handler("default")
+  basic_formatter.use_with_handler("default")
   logger_logger
   |> fatal("Disptaching to erlang logger", Error("Someting went wrong"))
+
+  let report_logger =
+    new("report_logger")
+    |> level(TRACE)
+    |> append_instance(Direct(
+      Some("logger_dispatch"),
+      level_value(TRACE),
+      logger_report_dispatch,
+    ))
+
+  report_logger
+  |> with_context([#("test", "report"), #("other", "field")])
+  |> log_with_data(INFO, "Dispatching with report logger", [#("data", "field")])
 
   logger.logger_log_report(
     Notice,
@@ -206,6 +219,7 @@ fn examples() {
       #(atom.create_from_string("apa"), dynamic.from("bepa")),
       #(atom.create_from_string("cepa"), dynamic.from("depa")),
     ]),
+    map.new(),
   )
 
   process.sleep(200)
