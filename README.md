@@ -320,6 +320,7 @@ These are some future improvements currently on the road-map for the Glimt libra
 - [ ] Add overload protection for Actor dispatchers
 - [ ] Add support for writing custom erlang logger handlers
     - Utilize overload protection
+- [ ] Option to use basic formatters without color
 - [ ] File-based config for setting log-levels of loggers based on name
     - Make it possible to override log-levels in libs by setting them in config file
 - [ ] File-dispatcher

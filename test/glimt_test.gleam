@@ -1,5 +1,6 @@
 import gleeunit
-import gleam/option.{None, Some}
+import gleeunit/should
+import gleam/option.{None}
 import gleam/erlang/process
 import gleam/erlang.{start_arguments}
 import gleam/json as gjson
@@ -16,14 +17,16 @@ import glimt/serializer/json.{
   new_json_serializer,
 }
 import glimt/dispatcher/stdout.{dispatcher}
+import glimt/erlang_logger/common.{a}
+import glimt/erlang_logger/level.{Notice}
 import glimt/erlang_logger/logger.{logger_dispatch, logger_report_dispatch}
 import glimt/erlang_logger/basic_formatter
 import glimt/erlang_logger/json_formatter
 import gleam/io
-import glimt/erlang_logger/level.{Notice}
 import gleam/map
+import gleam/string
 import gleam/dynamic
-import gleam/erlang/atom
+import gleam/erlang/charlist.{Charlist}
 
 pub fn main() {
   case start_arguments() {
@@ -40,6 +43,64 @@ pub fn main() {
 
 pub fn examples_test() {
   examples()
+}
+
+pub fn basic_formatter_minimal_test() {
+  basic_formatter.format(
+    dynamic.from(map.from_list([
+      #(a("level"), dynamic.from(Notice)),
+      #(a("msg"), dynamic.from(#(a("string"), "Test"))),
+      #(a("meta"), dynamic.from(map.from_list([]))),
+    ])),
+    dynamic.from(map.new()),
+  )
+  |> string.trim()
+  |> should.equal("notice: Test")
+}
+
+pub fn basic_formatter_unsupported_msg_type_test() {
+  basic_formatter.format(
+    dynamic.from(map.from_list([
+      #(a("level"), dynamic.from(Notice)),
+      #(a("msg"), dynamic.from(#("Test ~s ~s", ["some", "terms"]))),
+      #(a("meta"), dynamic.from(map.from_list([]))),
+    ])),
+    dynamic.from(map.new()),
+  )
+  |> string.trim()
+  |> should.equal("notice: Test some terms")
+}
+
+pub fn basic_formatter_list_report_test() {
+  basic_formatter.format(
+    dynamic.from(map.from_list([
+      #(a("level"), dynamic.from(Notice)),
+      #(
+        a("msg"),
+        dynamic.from(#(
+          a("report"),
+          [#(a("field1"), "value1"), #(a("field2"), "value2")],
+        )),
+      ),
+      #(
+        a("meta"),
+        dynamic.from(map.from_list([
+          #(
+            a("time"),
+            dynamic.from(time_ms_from_string(charlist.from_string(
+              "2023-01-06T17:14:42.640870+01:00",
+            ))),
+          ),
+          #(a("pid"), dynamic.from("<0.93.0>")),
+        ])),
+      ),
+    ])),
+    dynamic.from(map.new()),
+  )
+  |> string.trim()
+  |> should.equal(
+    "\e[2m2023-01-06T17:14:42.640870+01:00\e[22m\e[0m | \e[32mnotice\e[0m | \e[35m<<\"<0.93.0>\">>\e[39m\e[0m | (field1 => value1, field2 => value2)",
+  )
 }
 
 type Data {
@@ -246,3 +307,10 @@ fn examples() {
   )
   process.sleep(200)
 }
+
+fn time_ms_from_string(date_time: Charlist) {
+  rfc3339_to_system_time(date_time, [#(a("unit"), a("microsecond"))])
+}
+
+external fn rfc3339_to_system_time(date_time, options) -> Int =
+  "calendar" "rfc3339_to_system_time"

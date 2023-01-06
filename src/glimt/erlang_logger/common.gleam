@@ -31,7 +31,12 @@ pub external fn set_handler_config(
 
 /// Calls the standard erlang formatter. Useful when a formatter is unable to
 /// format the log_event
-pub external fn built_in_format(log_event: Dynamic, config: Dynamic) -> String =
+pub fn built_in_format(log_event: Dynamic, config: Dynamic) -> String {
+  logger_format(log_event, config)
+  |> to_string()
+}
+
+pub external fn logger_format(log_event: Dynamic, config: Dynamic) -> Charlist =
   "logger_formatter" "format"
 
 /// Converts a epoch microsecond value to a rfc3339 string
