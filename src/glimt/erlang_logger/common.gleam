@@ -41,7 +41,10 @@ pub external fn logger_format(log_event: Dynamic, config: Dynamic) -> Charlist =
 
 /// Converts a epoch microsecond value to a rfc3339 string
 pub fn time_to_string(time: Int) -> String {
-  system_time_to_rfc3339(time, from([#(a("unit"), a("microsecond"))]))
+  system_time_to_rfc3339(
+    time,
+    from([#(a("unit"), from(a("microsecond"))), #(a("offset"), from(0))]),
+  )
   |> to_string()
 }
 
