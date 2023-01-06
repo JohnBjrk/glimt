@@ -17,6 +17,15 @@ import glimt/style.{
   style_trace, style_warning,
 }
 
+/// Set `basic_formatter` for erlang logger [handler](https://www.erlang.org/doc/apps/kernel/logger_chapter.html#handlers)
+/// with `handler_id`
+///
+/// Example:
+/// ```gleam
+/// use_with_handler("default")
+/// ```
+///
+/// Set basic Glimt formatting for the default handler (logger_std_h)
 pub fn use_with_handler(handler_id: String) {
   set_handler_config(
     a(handler_id),
@@ -25,6 +34,8 @@ pub fn use_with_handler(handler_id: String) {
   )
 }
 
+/// This is the callback that will be used by erlang logger to format
+/// log events. It is not intended to use directly.
 pub fn format(log_event: Dynamic, config: Dynamic) {
   case decode_log_event(log_event) {
     Ok(log_event) -> {
@@ -73,7 +84,7 @@ fn format_name_and_pid(logger_name: Option(String), pid: Pid) {
   }
 }
 
-pub fn style_level(log_level: Level) {
+fn style_level(log_level: Level) {
   case log_level {
     Emergency -> style_fatal()
     Alert -> style_fatal()

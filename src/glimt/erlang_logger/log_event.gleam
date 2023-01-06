@@ -8,6 +8,7 @@ import gleam/dynamic.{
 import gleam/erlang/process.{Pid}
 import gleam/erlang/atom
 
+/// Gleam representation of an erlang log event
 pub type LogEvent {
   Message(
     time_us: Int,
@@ -27,6 +28,8 @@ pub type LogEvent {
   )
 }
 
+/// Translate a log event from erlang logger to corresponding gleam representation
+/// This function is useful when implementing custom formatters for the erlang logger
 pub fn decode_log_event(
   log_event: Dynamic,
 ) -> Result(LogEvent, List(DecodeError)) {

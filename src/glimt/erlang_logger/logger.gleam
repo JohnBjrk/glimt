@@ -10,6 +10,8 @@ import glimt/erlang_logger/level.{Critical, Debug, Info, Level, Notice, Warning}
 import glimt/erlang_logger/common.{a}
 import gleam/erlang/atom.{Atom}
 
+/// Dispatcher that send the `LogMessage` to the erlang built-in logger
+/// Logs the message as a string
 pub fn logger_dispatch(log_message: LogMessage(data, context, Dynamic)) {
   logger_log_message(
     map_level(log_message.level),
@@ -18,6 +20,9 @@ pub fn logger_dispatch(log_message: LogMessage(data, context, Dynamic)) {
   )
 }
 
+/// Dispatcher that send the `LogMessage` to the erlang built-in logger
+/// Logs the message as `msg` field in a report
+/// Merges `data` and `context` into the report
 pub fn logger_report_dispatch(
   log_message: LogMessage(
     List(#(String, String)),
