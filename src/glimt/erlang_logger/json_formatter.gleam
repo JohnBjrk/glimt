@@ -39,7 +39,7 @@ pub fn format(log_event: Dynamic, config: Dynamic) {
         Report(report: report, ..) ->
           report
           |> map(fn(entry) {
-            assert #(key, value) = entry
+            let assert #(key, value) = entry
             #(format_dynamic(key), string(format_dynamic(value)))
           })
       }

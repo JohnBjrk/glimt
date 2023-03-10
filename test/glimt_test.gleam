@@ -163,7 +163,7 @@ fn examples() {
     "An important message to all our travelers. We are being attacked by enemy ships.",
   )
 
-  assert Ok(actor_instance) =
+  let assert Ok(actor_instance) =
     start_instance("actor_instance", TRACE, dispatcher(basic_serializer))
   let actor_logger =
     new("actor_logger")

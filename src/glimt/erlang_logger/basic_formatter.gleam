@@ -70,7 +70,7 @@ fn format_report(report: List(#(Dynamic, Dynamic))) {
   let report_content =
     report
     |> list.map(fn(entry) {
-      assert #(key, value) = entry
+      let assert #(key, value) = entry
       format_dynamic(key) <> " => " <> format_dynamic(value)
     })
     |> join(", ")

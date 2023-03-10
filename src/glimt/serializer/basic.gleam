@@ -60,7 +60,7 @@ fn full_name(
 /// Basic serializer that writes the message as one line separated by `|`
 /// > NOTE: data and context will not be serialized
 pub fn basic_serializer(log_message: LogMessage(data, context, Dynamic)) {
-  assert LogMessage(
+  let assert LogMessage(
     time: time,
     name: name,
     pid: pid,

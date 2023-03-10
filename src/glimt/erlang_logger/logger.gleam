@@ -55,7 +55,7 @@ fn as_report_list(data: Option(List(#(String, String)))) {
     Some(data) ->
       data
       |> map(fn(entry) {
-        assert #(key, value) = entry
+        let assert #(key, value) = entry
         #(a(key), from(value))
       })
     _ -> []

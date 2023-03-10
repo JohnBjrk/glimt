@@ -4,7 +4,7 @@ import gleam/dynamic.{Dynamic, from}
 import gleam/erlang/process.{Subject, self}
 import gleam/otp/actor
 import gleam/list.{each}
-import birl/datetime.{now, to_iso}
+import birl/time.{now, to_iso8601}
 import glimt/log_message.{
   ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, LogMessage, TRACE, WARNING,
   level_value,
@@ -118,14 +118,14 @@ pub fn stdout_anonymous_instance(
 pub fn start_instance(
   name: String,
   level: LogLevel,
-  dispatch: Dispatcher(data, context, result_type),
+  dispatch: Dispatcher(data, context, Dynamic),
 ) -> Result(LoggerInstance(data, context), actor.StartError) {
   start_logger_actor(dispatch)
   |> result.map(fn(subject) { Actor(Some(name), level_value(level), subject) })
 }
 
 fn start_logger_actor(
-  dispatch,
+  dispatch: Dispatcher(data, context, Dynamic),
 ) -> Result(Subject(LogMessage(data, context, Dynamic)), actor.StartError) {
   actor.start(
     dispatch,
@@ -341,5 +341,5 @@ fn dispatch_log(
 
 fn now_iso() -> String {
   now()
-  |> to_iso()
+  |> to_iso8601()
 }

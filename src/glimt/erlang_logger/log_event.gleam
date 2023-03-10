@@ -1,3 +1,5 @@
+import gleam/result
+
 import glimt/erlang_logger/level.{Level}
 import glimt/erlang_logger/common.{a}
 import gleam/option.{None, Option, Some}
@@ -33,9 +35,9 @@ pub type LogEvent {
 pub fn decode_log_event(
   log_event: Dynamic,
 ) -> Result(LogEvent, List(DecodeError)) {
-  try meta = field(a("meta"), dynamic)(log_event)
-  try time = field(a("time"), int)(meta)
-  try pid = field(a("pid"), dynamic)(meta)
+  use meta <- result.then(field(a("meta"), dynamic)(log_event))
+  use time <- result.then(field(a("time"), int)(meta))
+  use pid <- result.then(field(a("pid"), dynamic)(meta))
   let logger_name = case field(a("loggername"), string)(meta) {
     Ok(name) -> Some(name)
     _ -> None
@@ -44,13 +46,13 @@ pub fn decode_log_event(
     Ok(error) -> Some(error)
     _ -> None
   }
-  try level = field(a("level"), dynamic)(log_event)
-  try msg = field(a("msg"), dynamic)(log_event)
-  try msg_type = element(0, dynamic)(msg)
-  try msg_type_atom = atom.from_dynamic(msg_type)
+  use level <- result.then(field(a("level"), dynamic)(log_event))
+  use msg <- result.then(field(a("msg"), dynamic)(log_event))
+  use msg_type <- result.then(element(0, dynamic)(msg))
+  use msg_type_atom <- result.then(atom.from_dynamic(msg_type))
   case atom.to_string(msg_type_atom) {
     "string" -> {
-      try message = element(1, string)(msg)
+      use message <- result.then(element(1, string)(msg))
       Ok(Message(
         time,
         unsafe_coerce(level),
@@ -62,7 +64,7 @@ pub fn decode_log_event(
     }
 
     "report" -> {
-      try report = element(1, dynamic)(msg)
+      use report <- result.then(element(1, dynamic)(msg))
       Ok(Report(
         time,
         unsafe_coerce(level),
