@@ -1,5 +1,4 @@
 import gleam/result
-
 import glimt/erlang_logger/level.{Level}
 import glimt/erlang_logger/common.{a}
 import gleam/option.{None, Option, Some}
