@@ -1,5 +1,5 @@
-import gleeunit
-import gleeunit/should
+import showtime
+import showtime/tests/should
 import gleam/option.{None}
 import gleam/erlang/process
 import gleam/erlang.{start_arguments}
@@ -30,7 +30,7 @@ import gleam/erlang/charlist.{Charlist}
 
 pub fn main() {
   case start_arguments() {
-    [] -> gleeunit.main()
+    [] -> showtime.main()
     ["demo"] -> examples()
     _ -> {
       io.println("Unexpected argument(s)!")
@@ -99,7 +99,7 @@ pub fn basic_formatter_list_report_test() {
   )
   |> string.trim()
   |> should.equal(
-    "\e[2m2023-01-06T16:14:42.640870+00:00\e[22m\e[0m | \e[32mnotice\e[0m | \e[35m<<\"<0.93.0>\">>\e[39m\e[0m | (field1 => value1, field2 => value2)",
+    "\e[2m2023-01-06T16:14:42.640870+00:00\e[22m | \e[32mnotice\e[39m | \e[35m<<\"<0.93.0>\">>\e[39m | (field1 => value1, field2 => value2)",
   )
 }
 

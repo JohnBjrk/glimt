@@ -9,13 +9,13 @@ description = "A Gleam library for logging"
 repository = { type = "github", user = "JohnBjrk", repo = "glimt" }
 
 [dependencies]
-gleam_stdlib = "~> 0.27"
+gleam_stdlib = "~> 0.28"
 gleam_erlang = "~> 0.18"
-galant = "~> 0.1"
 gleam_otp = "~> 0.5"
-birl = "~> 0.6"
+birl = "~> 0.8"
 gleam_json = "~> 0.5"
+gleam_community_ansi = "~> 1.1"
 
 [dev-dependencies]
-gleeunit = "~> 0.7"
+showtime = "~> 0.1"
 gleam_http = "~> 3.1"
