@@ -312,5 +312,5 @@ fn time_ms_from_string(date_time: Charlist) {
   rfc3339_to_system_time(date_time, [#(a("unit"), a("microsecond"))])
 }
 
-external fn rfc3339_to_system_time(date_time, options) -> Int =
-  "calendar" "rfc3339_to_system_time"
+@external(erlang, "calendar", "rfc3339_to_system_time")
+fn rfc3339_to_system_time(a: date_time, b: options) -> Int

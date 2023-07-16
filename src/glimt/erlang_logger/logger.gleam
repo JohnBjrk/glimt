@@ -75,12 +75,8 @@ fn map_level(log_level: LogLevel) -> Level {
   }
 }
 
-external fn logger_log_report(
-  Level,
-  Map(Atom, Dynamic),
-  Map(Atom, Dynamic),
-) -> Nil =
-  "logger" "log"
+@external(erlang, "logger", "log")
+fn logger_log_report(a: Level, b: Map(Atom, Dynamic), c: Map(Atom, Dynamic)) -> Nil
 
-external fn logger_log_message(Level, String, Map(Atom, Dynamic)) -> Nil =
-  "logger" "log"
+@external(erlang, "logger", "log")
+fn logger_log_message(a: Level, b: String, c: Map(Atom, Dynamic)) -> Nil

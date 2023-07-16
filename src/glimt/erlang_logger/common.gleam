@@ -22,12 +22,11 @@ pub fn format_dynamic(dynamic_value: Dynamic) -> String {
 }
 
 /// Set config for handler with `handler_id`
-pub external fn set_handler_config(
-  handler_id: Atom,
-  config_item: Atom,
-  config: #(Atom, Dynamic),
-) -> Nil =
-  "logger" "set_handler_config"
+@external(erlang, "logger", "set_handler_config")
+pub fn set_handler_config(handler_id handler_id: Atom, config_item config_item: Atom, config config: #(
+    Atom,
+    Dynamic,
+  )) -> Nil
 
 /// Calls the standard erlang formatter. Useful when a formatter is unable to
 /// format the log_event
@@ -36,8 +35,8 @@ pub fn built_in_format(log_event: Dynamic, config: Dynamic) -> String {
   |> to_string()
 }
 
-pub external fn logger_format(log_event: Dynamic, config: Dynamic) -> Charlist =
-  "logger_formatter" "format"
+@external(erlang, "logger_formatter", "format")
+pub fn logger_format(log_event log_event: Dynamic, config config: Dynamic) -> Charlist
 
 /// Converts a epoch microsecond value to a rfc3339 string
 pub fn time_to_string(time: Int) -> String {
@@ -48,5 +47,5 @@ pub fn time_to_string(time: Int) -> String {
   |> to_string()
 }
 
-external fn system_time_to_rfc3339(time: Int, options: Dynamic) -> Charlist =
-  "calendar" "system_time_to_rfc3339"
+@external(erlang, "calendar", "system_time_to_rfc3339")
+fn system_time_to_rfc3339(time time: Int, options options: Dynamic) -> Charlist
