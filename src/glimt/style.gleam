@@ -2,8 +2,7 @@
 //   dim, magenta, open, placeholder, start_bold, start_cyan, start_dim,
 //   start_green, start_red, start_yellow, to_string_styler,
 // }
-import gleam_community/ansi.{bold,
-  cyan, dim, green, magenta, red, reset, yellow}
+import gleam_community/ansi.{bold, cyan, dim, green, magenta, red, yellow}
 
 pub fn style_trace() {
   fn(s: String) {
