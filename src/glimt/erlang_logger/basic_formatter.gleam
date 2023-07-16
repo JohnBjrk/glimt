@@ -8,14 +8,8 @@ import gleam/erlang/process.{Pid}
 import glimt/erlang_logger/common.{
   a, built_in_format, format_dynamic, set_handler_config, time_to_string,
 }
-import glimt/erlang_logger/level.{
-  Alert, Critical, Debug, Emergency, Error, Info, Level, Notice, Warning,
-}
 import glimt/erlang_logger/log_event.{Message, Report, decode_log_event}
-import glimt/style.{
-  style_debug, style_error, style_fatal, style_info, style_name, style_time,
-  style_trace, style_warning,
-}
+import glimt/style.{style_erlang_level, style_name, style_time}
 
 /// Set `basic_formatter` for erlang logger [handler](https://www.erlang.org/doc/apps/kernel/logger_chapter.html#handlers)
 /// with `handler_id`
@@ -40,8 +34,9 @@ pub fn format(log_event: Dynamic, config: Dynamic) {
   case decode_log_event(log_event) {
     Ok(log_event) -> {
       let styled_time = style_time(time_to_string(log_event.time_us))
-      let level_string = erlang.format(log_event.level)
-      let styled_level = style_level(log_event.level)(level_string)
+      let styled_level =
+        erlang.format(log_event.level)
+        |> style_erlang_level(log_event.level)
       let styled_name =
         style_name(format_name_and_pid(log_event.logger_name, log_event.pid))
       let error_string = case log_event.error {
@@ -81,18 +76,5 @@ fn format_name_and_pid(logger_name: Option(String), pid: Pid) {
   case logger_name {
     Some(name) -> name <> "(" <> erlang.format(pid) <> ")"
     None -> erlang.format(pid)
-  }
-}
-
-fn style_level(log_level: Level) {
-  case log_level {
-    Emergency -> style_fatal()
-    Alert -> style_fatal()
-    Critical -> style_fatal()
-    Error -> style_error()
-    Warning -> style_warning()
-    Notice -> style_info()
-    Info -> style_debug()
-    Debug -> style_trace()
   }
 }

@@ -7,10 +7,7 @@ import glimt/log_message.{
   ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, LogMessage, NONE, TRACE, WARNING,
   level_string,
 }
-import glimt/style.{
-  style_debug, style_error, style_fatal, style_info, style_name, style_plain,
-  style_time, style_trace, style_warning,
-}
+import glimt/style.{style_level, style_name, style_time}
 
 pub fn level_symbol(log_level: LogLevel) {
   case log_level {
@@ -22,19 +19,6 @@ pub fn level_symbol(log_level: LogLevel) {
     ERROR -> "❌"
     FATAL -> "🔥"
     NONE -> "NONE"
-  }
-}
-
-fn style_level(log_level: LogLevel) {
-  case log_level {
-    ALL -> style_plain()
-    TRACE -> style_trace()
-    DEBUG -> style_debug()
-    INFO -> style_info()
-    WARNING -> style_warning()
-    ERROR -> style_error()
-    FATAL -> style_fatal()
-    NONE -> style_plain()
   }
 }
 
