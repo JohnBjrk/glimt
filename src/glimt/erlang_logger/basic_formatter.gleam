@@ -1,4 +1,3 @@
-import gleam/io
 import gleam/list
 import gleam/string.{join} as gleam_string
 import gleam/dynamic.{Dynamic}
@@ -9,7 +8,7 @@ import glimt/erlang_logger/common.{
   a, built_in_format, format_dynamic, set_handler_config, time_to_string,
 }
 import glimt/erlang_logger/log_event.{Message, Report, decode_log_event}
-import glimt/style.{style_erlang_level, style_name, style_time}
+import glimt/style.{default_erlang_color_style as style}
 
 /// Set `basic_formatter` for erlang logger [handler](https://www.erlang.org/doc/apps/kernel/logger_chapter.html#handlers)
 /// with `handler_id`
@@ -33,12 +32,15 @@ pub fn use_with_handler(handler_id: String) {
 pub fn format(log_event: Dynamic, config: Dynamic) {
   case decode_log_event(log_event) {
     Ok(log_event) -> {
-      let styled_time = style_time(time_to_string(log_event.time_us))
+      let styled_time = style.style_time(time_to_string(log_event.time_us))
       let styled_level =
         erlang.format(log_event.level)
-        |> style_erlang_level(log_event.level)
+        |> style.style_level(log_event.level)
       let styled_name =
-        style_name(format_name_and_pid(log_event.logger_name, log_event.pid))
+        style.style_name(format_name_and_pid(
+          log_event.logger_name,
+          log_event.pid,
+        ))
       let error_string = case log_event.error {
         Some(error) -> " | " <> error
         None -> ""
@@ -55,7 +57,6 @@ pub fn format(log_event: Dynamic, config: Dynamic) {
       }
     }
     _ -> {
-      io.println("Using build in format")
       built_in_format(log_event, config)
     }
   }

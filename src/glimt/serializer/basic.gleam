@@ -7,7 +7,7 @@ import glimt/log_message.{
   ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, LogMessage, NONE, TRACE, WARNING,
   level_string,
 }
-import glimt/style.{style_level, style_name, style_time}
+import glimt/style.{Style, default_color_style}
 
 pub fn level_symbol(log_level: LogLevel) {
   case log_level {
@@ -44,6 +44,16 @@ fn full_name(
 /// Basic serializer that writes the message as one line separated by `|`
 /// > NOTE: data and context will not be serialized
 pub fn basic_serializer(log_message: LogMessage(data, context, Dynamic)) {
+  basic_serializer_with_style(default_color_style, log_message)
+}
+
+/// Basic serializer that writes the message as one line separated by `|`
+/// Add one of the default (or a custom) `Style` for coloring the different segments
+/// > NOTE: data and context will not be serialized
+pub fn basic_serializer_with_style(
+  style: Style(LogLevel),
+  log_message: LogMessage(data, context, Dynamic),
+) {
   let assert LogMessage(
     time: time,
     name: name,
@@ -55,10 +65,10 @@ pub fn basic_serializer(log_message: LogMessage(data, context, Dynamic)) {
     error: error,
     ..,
   ) = log_message
-  let styled_time = style_time(time)
+  let styled_time = style.style_time(time)
   let styled_level =
     level_string(level)
-    |> style_level(level)
+    |> style.style_level(level)
   let styled_message = message
   let error_string = case error {
     Some(err) -> " | " <> inspect(err)
@@ -67,6 +77,6 @@ pub fn basic_serializer(log_message: LogMessage(data, context, Dynamic)) {
   let styled_name =
     name
     |> full_name(pid, instance_name, instance_pid)
-    |> style_name()
+    |> style.style_name()
   styled_time <> " | " <> styled_level <> " | " <> styled_name <> " | " <> styled_message <> error_string
 }

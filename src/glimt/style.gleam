@@ -1,13 +1,31 @@
-// import galant.{
-//   dim, magenta, open, placeholder, start_bold, start_cyan, start_dim,
-//   start_green, start_red, start_yellow, to_string_styler,
-// }
 import gleam_community/ansi.{bold, cyan, dim, green, magenta, red, yellow}
 import glimt/log_message.{
   ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, NONE, TRACE, WARNING,
 }
 import glimt/erlang_logger/level.{
   Alert, Critical, Debug, Emergency, Error, Info, Level, Notice, Warning,
+}
+
+pub type Style(level) {
+  Style(
+    style_level: fn(String, level) -> String,
+    style_name: fn(String) -> String,
+    style_time: fn(String) -> String,
+  )
+}
+
+pub const default_color_style = Style(style_level, style_name, style_time)
+
+pub const default_erlang_color_style = Style(
+  style_erlang_level,
+  style_name,
+  style_time,
+)
+
+pub const default_plain_style = Style(plain_level, style_plain, style_plain)
+
+pub fn plain_level(s: String, _level: level) {
+  s
 }
 
 pub fn style_level(s: String, level: LogLevel) {
@@ -36,39 +54,39 @@ pub fn style_erlang_level(s: String, level: Level) {
   }
 }
 
-pub fn style_trace(s: String) {
+fn style_trace(s: String) {
   s
   |> dim()
   |> cyan()
 }
 
-pub fn style_debug(s: String) {
+fn style_debug(s: String) {
   s
   |> cyan()
 }
 
-pub fn style_info(s: String) {
+fn style_info(s: String) {
   s
   |> green()
 }
 
-pub fn style_error(s: String) {
+fn style_error(s: String) {
   s
   |> red()
 }
 
-pub fn style_fatal(s: String) {
+fn style_fatal(s: String) {
   s
   |> bold()
   |> red()
 }
 
-pub fn style_warning(s: String) {
+fn style_warning(s: String) {
   s
   |> yellow()
 }
 
-pub fn style_plain(s: String) {
+fn style_plain(s: String) {
   s
 }
 

@@ -1,4 +1,3 @@
-import gleam/io
 import gleam/list.{append, map}
 import gleam/option.{Some}
 import gleam/dynamic.{Dynamic}
@@ -52,7 +51,6 @@ pub fn format(log_event: Dynamic, config: Dynamic) {
       |> json.to_string() <> "\n"
     }
     _ -> {
-      io.println("Using build in format")
       built_in_format(log_event, config)
     }
   }
