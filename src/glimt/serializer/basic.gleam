@@ -1,13 +1,13 @@
-import gleam/option.{None, Option, Some}
-import gleam/dynamic.{Dynamic}
+import gleam/option.{type Option, None, Some}
+import gleam/dynamic.{type Dynamic}
 import gleam/string.{inspect}
 import gleam/erlang.{format}
-import gleam/erlang/process.{Pid}
+import gleam/erlang/process.{type Pid}
 import glimt/log_message.{
-  ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, LogMessage, NONE, TRACE, WARNING,
-  level_string,
+  type LogLevel, type LogMessage, ALL, DEBUG, ERROR, FATAL, INFO, LogMessage,
+  NONE, TRACE, WARNING, level_string,
 }
-import glimt/style.{Style, default_color_style}
+import glimt/style.{type Style, default_color_style}
 
 pub fn level_symbol(log_level: LogLevel) {
   case log_level {
@@ -30,13 +30,25 @@ fn full_name(
 ) {
   case instance_name, instance_pid {
     Some(instance_name), Some(instance_pid) ->
-      name <> "(" <> format(pid) <> ")/" <> instance_name <> "(" <> format(
-        instance_pid,
-      ) <> ")"
+      name
+      <> "("
+      <> format(pid)
+      <> ")/"
+      <> instance_name
+      <> "("
+      <> format(instance_pid)
+      <> ")"
     Some(instance_name), None ->
       name <> "(" <> format(pid) <> ")/" <> instance_name
     None, Some(instance_pid) ->
-      name <> "(" <> format(pid) <> ")/" <> "???" <> "(" <> format(instance_pid) <> ")"
+      name
+      <> "("
+      <> format(pid)
+      <> ")/"
+      <> "???"
+      <> "("
+      <> format(instance_pid)
+      <> ")"
     None, None -> name <> "(" <> format(pid) <> ")"
   }
 }
@@ -78,5 +90,12 @@ pub fn basic_serializer_with_style(
     name
     |> full_name(pid, instance_name, instance_pid)
     |> style.style_name()
-  styled_time <> " | " <> styled_level <> " | " <> styled_name <> " | " <> styled_message <> error_string
+  styled_time
+  <> " | "
+  <> styled_level
+  <> " | "
+  <> styled_name
+  <> " | "
+  <> styled_message
+  <> error_string
 }

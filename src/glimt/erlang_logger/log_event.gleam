@@ -1,12 +1,13 @@
 import gleam/result
-import glimt/erlang_logger/level.{Level}
+import glimt/erlang_logger/level.{type Level}
 import glimt/erlang_logger/common.{a}
-import gleam/option.{None, Option, Some}
-import gleam/map
+import gleam/option.{type Option, None, Some}
+import gleam/dict
 import gleam/dynamic.{
-  DecodeError, Dynamic, dynamic, element, field, int, string, unsafe_coerce,
+  type DecodeError, type Dynamic, dynamic, element, field, int, string,
+  unsafe_coerce,
 }
-import gleam/erlang/process.{Pid}
+import gleam/erlang/process.{type Pid}
 import gleam/erlang/atom
 
 /// Gleam representation of an erlang log event
@@ -73,6 +74,7 @@ pub fn decode_log_event(
         error,
       ))
     }
+    _ -> panic as "Unexpected message type"
   }
 }
 
@@ -81,9 +83,9 @@ fn report_as_list(report: Dynamic) {
   case list_result {
     Ok(list) -> list
     _ -> {
-      let map_result = dynamic.map(dynamic, dynamic)(report)
+      let map_result = dynamic.dict(dynamic, dynamic)(report)
       case map_result {
-        Ok(map_report) -> map.to_list(map_report)
+        Ok(map_report) -> dict.to_list(map_report)
         _ -> []
       }
     }

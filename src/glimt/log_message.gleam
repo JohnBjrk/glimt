@@ -1,5 +1,5 @@
-import gleam/option.{Option}
-import gleam/erlang/process.{Pid}
+import gleam/option.{type Option}
+import gleam/erlang/process.{type Pid}
 
 /// LogMessage contains all the data that can be dispatched/serialized by a logger instance
 pub type LogMessage(data, context, result_type) {

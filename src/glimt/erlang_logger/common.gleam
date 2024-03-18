@@ -1,9 +1,9 @@
 //// Common functions used by the `logger`, `basic_formatter` and `json_formatter`
 
-import gleam/dynamic.{Dynamic, from, string}
+import gleam/dynamic.{type Dynamic, from, string}
 import gleam/erlang
-import gleam/erlang/atom.{Atom}
-import gleam/erlang/charlist.{Charlist, to_string}
+import gleam/erlang/atom.{type Atom}
+import gleam/erlang/charlist.{type Charlist, to_string}
 
 /// Shorthand for creating an `Atom`
 /// Equivalent to `atom.create_from_string()`
@@ -23,10 +23,11 @@ pub fn format_dynamic(dynamic_value: Dynamic) -> String {
 
 /// Set config for handler with `handler_id`
 @external(erlang, "logger", "set_handler_config")
-pub fn set_handler_config(handler_id handler_id: Atom, config_item config_item: Atom, config config: #(
-    Atom,
-    Dynamic,
-  )) -> Nil
+pub fn set_handler_config(
+  handler_id handler_id: Atom,
+  config_item config_item: Atom,
+  config config: #(Atom, Dynamic),
+) -> Nil
 
 /// Calls the standard erlang formatter. Useful when a formatter is unable to
 /// format the log_event
@@ -36,7 +37,10 @@ pub fn built_in_format(log_event: Dynamic, config: Dynamic) -> String {
 }
 
 @external(erlang, "logger_formatter", "format")
-pub fn logger_format(log_event log_event: Dynamic, config config: Dynamic) -> Charlist
+pub fn logger_format(
+  log_event log_event: Dynamic,
+  config config: Dynamic,
+) -> Charlist
 
 /// Converts a epoch microsecond value to a rfc3339 string
 pub fn time_to_string(time: Int) -> String {

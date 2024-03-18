@@ -1,13 +1,13 @@
-import gleam/option.{None, Option, Some}
+import gleam/option.{type Option, None, Some}
 import gleam/result
-import gleam/dynamic.{Dynamic, from}
-import gleam/erlang/process.{Subject, self}
+import gleam/dynamic.{type Dynamic, from}
+import gleam/erlang/process.{type Subject, self}
 import gleam/otp/actor
 import gleam/list.{each}
-import birl/time.{now, to_iso8601}
+import birl.{now, to_iso8601}
 import glimt/log_message.{
-  ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, LogMessage, TRACE, WARNING,
-  level_value,
+  type LogLevel, type LogMessage, ALL, DEBUG, ERROR, FATAL, INFO, LogMessage,
+  TRACE, WARNING, level_value,
 }
 import glimt/serializer/basic.{basic_serializer}
 import glimt/dispatcher/stdout.{dispatcher}
@@ -127,17 +127,13 @@ pub fn start_instance(
 fn start_logger_actor(
   dispatch: Dispatcher(data, context, Dynamic),
 ) -> Result(Subject(LogMessage(data, context, Dynamic)), actor.StartError) {
-  actor.start(
-    dispatch,
-    fn(message, dispatch) {
-      case message {
-        LogMessage(..) ->
-          dispatch(LogMessage(..message, instance_pid: Some(self())))
-        _ -> Nil
-      }
-      actor.Continue(dispatch)
-    },
-  )
+  actor.start(dispatch, fn(message, dispatch) {
+    case message {
+      LogMessage(..) ->
+        dispatch(LogMessage(..message, instance_pid: Some(self())))
+    }
+    actor.continue(dispatch)
+  })
 }
 
 /// Log a message at `DEBUG` level
@@ -325,9 +321,11 @@ fn dispatch_log(
     case log_message.level_value >= logger.level_min_value {
       True ->
         case impl {
-          Direct(instance_name, level_min_value, dispatch) if level_value >= level_min_value ->
-            dispatch(LogMessage(..log_message, instance_name: instance_name))
-          Actor(instance_name, level_min_value, subject) if level_value >= level_min_value ->
+          Direct(instance_name, level_min_value, dispatch)
+            if level_value >= level_min_value
+          -> dispatch(LogMessage(..log_message, instance_name: instance_name))
+          Actor(instance_name, level_min_value, subject) if level_value
+            >= level_min_value ->
             subject
             |> process.send(
               LogMessage(..log_message, instance_name: instance_name),

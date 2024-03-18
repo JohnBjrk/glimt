@@ -1,6 +1,6 @@
 import gleam/list.{append, map}
 import gleam/option.{Some}
-import gleam/dynamic.{Dynamic}
+import gleam/dynamic.{type Dynamic}
 import gleam/json.{int, object, string}
 import glimt/erlang_logger/log_event.{Message, Report, decode_log_event}
 import glimt/erlang_logger/common.{
@@ -17,11 +17,10 @@ import glimt/erlang_logger/common.{
 ///
 /// Set basic Glimt formatting for the default handler (logger_std_h)
 pub fn use_with_handler(handler_id: String) {
-  set_handler_config(
-    a(handler_id),
-    a("formatter"),
-    #(a("glimt@erlang_logger@json_formatter"), dynamic.from(Nil)),
-  )
+  set_handler_config(a(handler_id), a("formatter"), #(
+    a("glimt@erlang_logger@json_formatter"),
+    dynamic.from(Nil),
+  ))
 }
 
 /// This is the callback that will be used by erlang logger to format
@@ -48,7 +47,8 @@ pub fn format(log_event: Dynamic, config: Dynamic) {
         _ -> report_json_fields
       }
       object(json_fields_with_error)
-      |> json.to_string() <> "\n"
+      |> json.to_string()
+      <> "\n"
     }
     _ -> {
       built_in_format(log_event, config)

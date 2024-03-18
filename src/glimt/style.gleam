@@ -1,9 +1,9 @@
 import gleam_community/ansi.{bold, cyan, dim, green, magenta, red, yellow}
 import glimt/log_message.{
-  ALL, DEBUG, ERROR, FATAL, INFO, LogLevel, NONE, TRACE, WARNING,
+  type LogLevel, ALL, DEBUG, ERROR, FATAL, INFO, NONE, TRACE, WARNING,
 }
 import glimt/erlang_logger/level.{
-  Alert, Critical, Debug, Emergency, Error, Info, Level, Notice, Warning,
+  type Level, Alert, Critical, Debug, Emergency, Error, Info, Notice, Warning,
 }
 
 pub type Style(level) {

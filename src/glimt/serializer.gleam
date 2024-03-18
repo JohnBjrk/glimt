@@ -1,4 +1,4 @@
-import glimt/log_message.{LogMessage}
+import glimt/log_message.{type LogMessage}
 
 /// Represents a serializer of a LogMessage
 pub type Serializer(data, context, result_type) =

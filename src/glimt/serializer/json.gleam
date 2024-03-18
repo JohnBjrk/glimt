@@ -2,9 +2,9 @@ import gleam/option.{None, Some}
 import gleam/erlang.{format}
 import gleam/list
 import gleam/string as str
-import gleam/json.{Json, nullable, object, string}
-import glimt/serializer.{Serializer}
-import glimt/log_message.{LogMessage, level_string}
+import gleam/json.{type Json, nullable, object, string}
+import glimt/serializer.{type Serializer}
+import glimt/log_message.{type LogMessage, level_string}
 
 pub type JsonSerializerBuilder(data, context, result_type) =
   fn(LogMessage(data, context, result_type)) -> List(#(String, Json))
@@ -38,17 +38,15 @@ pub fn add_standard_log_message(
       #("pid", string(format(log_message.pid))),
       #(
         "instance_name",
-        nullable(
-          log_message.instance_name,
-          fn(instance_name) { string(instance_name) },
-        ),
+        nullable(log_message.instance_name, fn(instance_name) {
+          string(instance_name)
+        }),
       ),
       #(
         "instance_pid",
-        nullable(
-          log_message.instance_pid,
-          fn(instance_pid) { string(format(instance_pid)) },
-        ),
+        nullable(log_message.instance_pid, fn(instance_pid) {
+          string(format(instance_pid))
+        }),
       ),
       #("level", string(level_string(log_message.level))),
       #("message", string(log_message.message)),

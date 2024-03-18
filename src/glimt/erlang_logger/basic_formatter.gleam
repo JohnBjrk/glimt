@@ -1,9 +1,9 @@
 import gleam/list
-import gleam/string.{join} as gleam_string
-import gleam/dynamic.{Dynamic}
-import gleam/option.{None, Option, Some}
+import gleam/string.{join}
+import gleam/dynamic.{type Dynamic}
+import gleam/option.{type Option, None, Some}
 import gleam/erlang
-import gleam/erlang/process.{Pid}
+import gleam/erlang/process.{type Pid}
 import glimt/erlang_logger/common.{
   a, built_in_format, format_dynamic, set_handler_config, time_to_string,
 }
@@ -20,11 +20,10 @@ import glimt/style.{default_erlang_color_style as style}
 ///
 /// Set basic Glimt formatting for the default handler (logger_std_h)
 pub fn use_with_handler(handler_id: String) {
-  set_handler_config(
-    a(handler_id),
-    a("formatter"),
-    #(a("glimt@erlang_logger@basic_formatter"), dynamic.from(Nil)),
-  )
+  set_handler_config(a(handler_id), a("formatter"), #(
+    a("glimt@erlang_logger@basic_formatter"),
+    dynamic.from(Nil),
+  ))
 }
 
 /// This is the callback that will be used by erlang logger to format
@@ -48,11 +47,27 @@ pub fn format(log_event: Dynamic, config: Dynamic) {
       case log_event {
         Message(message: message, ..) -> {
           let styled_message = message
-          styled_time <> " | " <> styled_level <> " | " <> styled_name <> " | " <> styled_message <> error_string <> "\n"
+          styled_time
+          <> " | "
+          <> styled_level
+          <> " | "
+          <> styled_name
+          <> " | "
+          <> styled_message
+          <> error_string
+          <> "\n"
         }
         Report(report: report, ..) -> {
           let styled_message = format_report(report)
-          styled_time <> " | " <> styled_level <> " | " <> styled_name <> " | " <> styled_message <> error_string <> "\n"
+          styled_time
+          <> " | "
+          <> styled_level
+          <> " | "
+          <> styled_name
+          <> " | "
+          <> styled_message
+          <> error_string
+          <> "\n"
         }
       }
     }
